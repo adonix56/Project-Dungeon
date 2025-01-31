@@ -28,7 +28,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             ""id"": ""fc760a9f-3396-4bee-ba80-74243840651c"",
             ""actions"": [
                 {
-                    ""name"": ""DragContact"",
+                    ""name"": ""FirstContact"",
                     ""type"": ""Button"",
                     ""id"": ""554d1912-4cdb-424f-9a1c-431d7b362466"",
                     ""expectedControlType"": """",
@@ -37,7 +37,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""DragPosition"",
+                    ""name"": ""FirstPosition"",
                     ""type"": ""Value"",
                     ""id"": ""f9c557a2-b91b-415d-b4b1-1e13672aba70"",
                     ""expectedControlType"": ""Vector2"",
@@ -46,7 +46,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""PinchContact"",
+                    ""name"": ""SecondContact"",
                     ""type"": ""Button"",
                     ""id"": ""e5f0da99-c975-46f7-a1cd-c2f438d517a3"",
                     ""expectedControlType"": """",
@@ -55,7 +55,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""PinchPosition"",
+                    ""name"": ""SecondPosition"",
                     ""type"": ""Value"",
                     ""id"": ""9064ec9d-1d3e-462a-bc97-3d0a15905ae9"",
                     ""expectedControlType"": ""Vector2"",
@@ -68,22 +68,22 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""f9b02116-ccf8-4e8f-9b7e-c6ba51533c41"",
-                    ""path"": ""<Touchscreen>/primaryTouch/press"",
+                    ""path"": ""<Touchscreen>/touch0/press"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""DragContact"",
+                    ""action"": ""FirstContact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""c9174b93-ad5a-4c32-9561-1998aac647dd"",
-                    ""path"": ""<Touchscreen>/primaryTouch/position"",
+                    ""path"": ""<Touchscreen>/touch0/position"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""DragPosition"",
+                    ""action"": ""FirstPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -94,7 +94,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PinchContact"",
+                    ""action"": ""SecondContact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -105,7 +105,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PinchPosition"",
+                    ""action"": ""SecondPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -116,10 +116,10 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
 }");
         // PlayerFarm
         m_PlayerFarm = asset.FindActionMap("PlayerFarm", throwIfNotFound: true);
-        m_PlayerFarm_DragContact = m_PlayerFarm.FindAction("DragContact", throwIfNotFound: true);
-        m_PlayerFarm_DragPosition = m_PlayerFarm.FindAction("DragPosition", throwIfNotFound: true);
-        m_PlayerFarm_PinchContact = m_PlayerFarm.FindAction("PinchContact", throwIfNotFound: true);
-        m_PlayerFarm_PinchPosition = m_PlayerFarm.FindAction("PinchPosition", throwIfNotFound: true);
+        m_PlayerFarm_FirstContact = m_PlayerFarm.FindAction("FirstContact", throwIfNotFound: true);
+        m_PlayerFarm_FirstPosition = m_PlayerFarm.FindAction("FirstPosition", throwIfNotFound: true);
+        m_PlayerFarm_SecondContact = m_PlayerFarm.FindAction("SecondContact", throwIfNotFound: true);
+        m_PlayerFarm_SecondPosition = m_PlayerFarm.FindAction("SecondPosition", throwIfNotFound: true);
     }
 
     ~@InputControls()
@@ -186,18 +186,18 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     // PlayerFarm
     private readonly InputActionMap m_PlayerFarm;
     private List<IPlayerFarmActions> m_PlayerFarmActionsCallbackInterfaces = new List<IPlayerFarmActions>();
-    private readonly InputAction m_PlayerFarm_DragContact;
-    private readonly InputAction m_PlayerFarm_DragPosition;
-    private readonly InputAction m_PlayerFarm_PinchContact;
-    private readonly InputAction m_PlayerFarm_PinchPosition;
+    private readonly InputAction m_PlayerFarm_FirstContact;
+    private readonly InputAction m_PlayerFarm_FirstPosition;
+    private readonly InputAction m_PlayerFarm_SecondContact;
+    private readonly InputAction m_PlayerFarm_SecondPosition;
     public struct PlayerFarmActions
     {
         private @InputControls m_Wrapper;
         public PlayerFarmActions(@InputControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @DragContact => m_Wrapper.m_PlayerFarm_DragContact;
-        public InputAction @DragPosition => m_Wrapper.m_PlayerFarm_DragPosition;
-        public InputAction @PinchContact => m_Wrapper.m_PlayerFarm_PinchContact;
-        public InputAction @PinchPosition => m_Wrapper.m_PlayerFarm_PinchPosition;
+        public InputAction @FirstContact => m_Wrapper.m_PlayerFarm_FirstContact;
+        public InputAction @FirstPosition => m_Wrapper.m_PlayerFarm_FirstPosition;
+        public InputAction @SecondContact => m_Wrapper.m_PlayerFarm_SecondContact;
+        public InputAction @SecondPosition => m_Wrapper.m_PlayerFarm_SecondPosition;
         public InputActionMap Get() { return m_Wrapper.m_PlayerFarm; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -207,34 +207,34 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerFarmActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerFarmActionsCallbackInterfaces.Add(instance);
-            @DragContact.started += instance.OnDragContact;
-            @DragContact.performed += instance.OnDragContact;
-            @DragContact.canceled += instance.OnDragContact;
-            @DragPosition.started += instance.OnDragPosition;
-            @DragPosition.performed += instance.OnDragPosition;
-            @DragPosition.canceled += instance.OnDragPosition;
-            @PinchContact.started += instance.OnPinchContact;
-            @PinchContact.performed += instance.OnPinchContact;
-            @PinchContact.canceled += instance.OnPinchContact;
-            @PinchPosition.started += instance.OnPinchPosition;
-            @PinchPosition.performed += instance.OnPinchPosition;
-            @PinchPosition.canceled += instance.OnPinchPosition;
+            @FirstContact.started += instance.OnFirstContact;
+            @FirstContact.performed += instance.OnFirstContact;
+            @FirstContact.canceled += instance.OnFirstContact;
+            @FirstPosition.started += instance.OnFirstPosition;
+            @FirstPosition.performed += instance.OnFirstPosition;
+            @FirstPosition.canceled += instance.OnFirstPosition;
+            @SecondContact.started += instance.OnSecondContact;
+            @SecondContact.performed += instance.OnSecondContact;
+            @SecondContact.canceled += instance.OnSecondContact;
+            @SecondPosition.started += instance.OnSecondPosition;
+            @SecondPosition.performed += instance.OnSecondPosition;
+            @SecondPosition.canceled += instance.OnSecondPosition;
         }
 
         private void UnregisterCallbacks(IPlayerFarmActions instance)
         {
-            @DragContact.started -= instance.OnDragContact;
-            @DragContact.performed -= instance.OnDragContact;
-            @DragContact.canceled -= instance.OnDragContact;
-            @DragPosition.started -= instance.OnDragPosition;
-            @DragPosition.performed -= instance.OnDragPosition;
-            @DragPosition.canceled -= instance.OnDragPosition;
-            @PinchContact.started -= instance.OnPinchContact;
-            @PinchContact.performed -= instance.OnPinchContact;
-            @PinchContact.canceled -= instance.OnPinchContact;
-            @PinchPosition.started -= instance.OnPinchPosition;
-            @PinchPosition.performed -= instance.OnPinchPosition;
-            @PinchPosition.canceled -= instance.OnPinchPosition;
+            @FirstContact.started -= instance.OnFirstContact;
+            @FirstContact.performed -= instance.OnFirstContact;
+            @FirstContact.canceled -= instance.OnFirstContact;
+            @FirstPosition.started -= instance.OnFirstPosition;
+            @FirstPosition.performed -= instance.OnFirstPosition;
+            @FirstPosition.canceled -= instance.OnFirstPosition;
+            @SecondContact.started -= instance.OnSecondContact;
+            @SecondContact.performed -= instance.OnSecondContact;
+            @SecondContact.canceled -= instance.OnSecondContact;
+            @SecondPosition.started -= instance.OnSecondPosition;
+            @SecondPosition.performed -= instance.OnSecondPosition;
+            @SecondPosition.canceled -= instance.OnSecondPosition;
         }
 
         public void RemoveCallbacks(IPlayerFarmActions instance)
@@ -254,9 +254,9 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     public PlayerFarmActions @PlayerFarm => new PlayerFarmActions(this);
     public interface IPlayerFarmActions
     {
-        void OnDragContact(InputAction.CallbackContext context);
-        void OnDragPosition(InputAction.CallbackContext context);
-        void OnPinchContact(InputAction.CallbackContext context);
-        void OnPinchPosition(InputAction.CallbackContext context);
+        void OnFirstContact(InputAction.CallbackContext context);
+        void OnFirstPosition(InputAction.CallbackContext context);
+        void OnSecondContact(InputAction.CallbackContext context);
+        void OnSecondPosition(InputAction.CallbackContext context);
     }
 }

@@ -6,7 +6,7 @@
             "id": "fc760a9f-3396-4bee-ba80-74243840651c",
             "actions": [
                 {
-                    "name": "DragContact",
+                    "name": "FirstContact",
                     "type": "Button",
                     "id": "554d1912-4cdb-424f-9a1c-431d7b362466",
                     "expectedControlType": "",
@@ -15,7 +15,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "DragPosition",
+                    "name": "FirstPosition",
                     "type": "Value",
                     "id": "f9c557a2-b91b-415d-b4b1-1e13672aba70",
                     "expectedControlType": "Vector2",
@@ -24,7 +24,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "PinchContact",
+                    "name": "SecondContact",
                     "type": "Button",
                     "id": "e5f0da99-c975-46f7-a1cd-c2f438d517a3",
                     "expectedControlType": "",
@@ -33,7 +33,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "PinchPosition",
+                    "name": "SecondPosition",
                     "type": "Value",
                     "id": "9064ec9d-1d3e-462a-bc97-3d0a15905ae9",
                     "expectedControlType": "Vector2",
@@ -46,22 +46,22 @@
                 {
                     "name": "",
                     "id": "f9b02116-ccf8-4e8f-9b7e-c6ba51533c41",
-                    "path": "<Touchscreen>/primaryTouch/press",
+                    "path": "<Touchscreen>/touch0/press",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "DragContact",
+                    "action": "FirstContact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "c9174b93-ad5a-4c32-9561-1998aac647dd",
-                    "path": "<Touchscreen>/primaryTouch/position",
+                    "path": "<Touchscreen>/touch0/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "DragPosition",
+                    "action": "FirstPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -72,7 +72,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PinchContact",
+                    "action": "SecondContact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -83,7 +83,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PinchPosition",
+                    "action": "SecondPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

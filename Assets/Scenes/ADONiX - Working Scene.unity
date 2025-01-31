@@ -182,7 +182,7 @@ Camera:
   far clip plane: 1010.71
   field of view: 60
   orthographic: 1
-  orthographic size: 14.61
+  orthographic size: 13.13
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -270,6 +270,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraMoveSpeed: 0.03
+  cameraZoomSpeed: 0.03
 --- !u!1 &265344120
 GameObject:
   m_ObjectHideFlags: 0
