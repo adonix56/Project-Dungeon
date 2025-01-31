@@ -68,7 +68,13 @@ crashlytics-build.properties
 # Packed Addressables
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 
+# Temporary files
+.utmp/
+
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
 /[Aa]ssets/[Tt]utorialInfo*
+/[Aa]ssets/Toon Fantasy Nature*
+/[Aa]ssets/[Tt]ext[Mm]esh*[Pp]ro*

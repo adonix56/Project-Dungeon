@@ -1,0 +1,94 @@
+{
+    "name": "InputControls",
+    "maps": [
+        {
+            "name": "PlayerFarm",
+            "id": "fc760a9f-3396-4bee-ba80-74243840651c",
+            "actions": [
+                {
+                    "name": "DragContact",
+                    "type": "Button",
+                    "id": "554d1912-4cdb-424f-9a1c-431d7b362466",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "DragPosition",
+                    "type": "Value",
+                    "id": "f9c557a2-b91b-415d-b4b1-1e13672aba70",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinchContact",
+                    "type": "Button",
+                    "id": "e5f0da99-c975-46f7-a1cd-c2f438d517a3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PinchPosition",
+                    "type": "Value",
+                    "id": "9064ec9d-1d3e-462a-bc97-3d0a15905ae9",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f9b02116-ccf8-4e8f-9b7e-c6ba51533c41",
+                    "path": "<Touchscreen>/primaryTouch/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DragContact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c9174b93-ad5a-4c32-9561-1998aac647dd",
+                    "path": "<Touchscreen>/primaryTouch/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DragPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "839134b8-0709-42ed-8ea0-42e8b5b5711e",
+                    "path": "<Touchscreen>/touch1/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinchContact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be2fe76b-6da4-4ed8-a978-5542a8f0af02",
+                    "path": "<Touchscreen>/touch1/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinchPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
