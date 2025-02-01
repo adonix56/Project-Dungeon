@@ -15,15 +15,16 @@ public class GestureDetection : MonoBehaviour
     public event Action<Vector2> OnDragDistance;
     public event Action OnPinchStart;
     public event Action<float> OnPinchDistance;
+    //public event Action<ISelectable> OnSelect;
+    //public event Action<ISelectable> OnSelectHold;
 
-    [SerializeField] private Transform cameraTransform;
-    [SerializeField] private float cameraMoveSpeed;
+    [SerializeField] private float minDragDistance;
 
     private PlayerController controller;
+    private Camera mainCamera;
     private Vector2 startDragPosition;
-    private Vector2 currentDragPosition;
-    private Vector3 cameraStartPosition;
     private float startPinchDistance;
+    private bool isDragging;
     public GestureType currentGestureType { get; private set; }
 
     private void Awake()
@@ -41,11 +42,14 @@ public class GestureDetection : MonoBehaviour
     {
         currentGestureType = GestureType.None;
         controller = GetComponent<PlayerController>();
+        mainCamera = Camera.main;
 
         controller.OnDragStart += DragStart;
         controller.OnDragEnd += DragEnd;
         controller.OnPinchStart += PinchStart;
         controller.OnPinchEnd += PinchEnd;
+        controller.OnSelectPerformed += Select;
+        controller.OnSelectHoldPerformed += SelectHold;
     }
 
     private void DragStart()
@@ -65,6 +69,7 @@ public class GestureDetection : MonoBehaviour
     private void DragEnd()
     {
         StopAllCoroutines();
+        isDragging = false;
         startDragPosition = Vector2.zero;
         currentGestureType = GestureType.None;
     }
@@ -90,15 +95,55 @@ public class GestureDetection : MonoBehaviour
         currentGestureType = GestureType.None;
     }
 
+    private void Select()
+    {
+        if (HitInteractable(out ISelectable selectable))
+        {
+            selectable.Select();
+            Debug.Log("J$ GestureDetection Select");
+            DragEnd();
+        }
+    }
+
+    private void SelectHold()
+    {
+        if (!isDragging && HitInteractable(out ISelectable selectable)) 
+        {
+            selectable.SelectHold();
+            Debug.Log("J$ GestureDetection SelectHold");
+            DragEnd();
+        }
+    }
+
+    private bool HitInteractable(out ISelectable selectable)
+    {
+        Ray ray = mainCamera.ScreenPointToRay(controller.GetTouchPosition());
+        selectable = null;
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
+        {
+            MonoBehaviour[] components = hitInfo.collider.gameObject.GetComponents<MonoBehaviour>();
+            foreach (var component in components)
+            {
+                if (component is ISelectable)
+                {
+                    selectable = component as ISelectable;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private IEnumerator UpdateDragPosition()
     {
         while (true)
         {
             if (currentGestureType == GestureType.Drag)
             {
-                currentDragPosition = controller.GetTouchPosition();
+                Vector2 currentDragPosition = controller.GetTouchPosition();
                 Vector2 moveVector = (startDragPosition - currentDragPosition);
-                OnDragDistance?.Invoke(moveVector);
+                if (moveVector.magnitude > minDragDistance) isDragging = true;
+                if (isDragging) OnDragDistance?.Invoke(moveVector);
             }
             yield return null;
         }

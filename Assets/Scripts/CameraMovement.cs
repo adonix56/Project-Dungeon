@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CameraDragMovement : MonoBehaviour
+public class CameraMovement : MonoBehaviour
 {
     [SerializeField] private float cameraMoveSpeed;
     [SerializeField] private float cameraZoomSpeed;

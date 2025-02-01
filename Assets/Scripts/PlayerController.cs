@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,6 +13,8 @@ public class PlayerController : MonoBehaviour
     public event Action OnDragEnd;
     public event Action OnPinchStart;
     public event Action OnPinchEnd;
+    public event Action OnSelectPerformed;
+    public event Action OnSelectHoldPerformed;
 
     private InputControls inputControls;
     public int numTouches { get; private set; }
@@ -44,6 +47,9 @@ public class PlayerController : MonoBehaviour
         inputControls.PlayerFarm.FirstContact.canceled += _ => TouchUp(TouchID.Drag); //EndDrag();
         inputControls.PlayerFarm.SecondContact.started += _ => TouchDown(TouchID.Pinch); //StartPinch();
         inputControls.PlayerFarm.SecondContact.canceled += _ => TouchUp(TouchID.Pinch); //EndPinch();
+
+        inputControls.PlayerFarm.Select.performed += _ => Select();
+        inputControls.PlayerFarm.SelectHold.performed += _ => SelectHold();
     }
 
     private void TouchDown(TouchID touchID)
@@ -51,11 +57,11 @@ public class PlayerController : MonoBehaviour
         numTouches++;
         if (numTouches == 1)
         {
-            Debug.Log("J$ StartDrag");
+            Debug.Log("J$ PlayerController StartDrag");
             primaryTouch = touchID;
             OnDragStart?.Invoke();
         } else if (numTouches == 2) {
-            Debug.Log("J$ StartPinch");
+            Debug.Log("J$ PlayerController StartPinch");
             OnPinchStart?.Invoke();
         }
     }
@@ -65,12 +71,12 @@ public class PlayerController : MonoBehaviour
         numTouches--;
         if (numTouches == 0)
         {
-            Debug.Log("J$ EndDrag");
+            Debug.Log("J$ PlayerController EndDrag");
             primaryTouch = TouchID.None;
             OnDragEnd?.Invoke();
         } else if (numTouches == 1)
         {
-            Debug.Log("J$ EndPinch StartDrag");
+            Debug.Log("J$ PlayerController EndPinch StartDrag");
             primaryTouch = touchID == TouchID.Drag ? TouchID.Pinch : TouchID.Drag;
             OnPinchEnd?.Invoke();
             OnDragStart?.Invoke();
@@ -79,31 +85,6 @@ public class PlayerController : MonoBehaviour
             Debug.LogWarning("J$ PlayerController: TouchUp() unexpected number of touches");
         }
     }
-    /*
-    private void StartDrag()
-    {
-        Debug.Log("J$ StartDrag");
-        OnDragStart?.Invoke();
-    }
-
-    private void EndDrag()
-    {
-        Debug.Log("J$ EndDrag");
-        OnDragEnd?.Invoke();
-    }
-
-    private void StartPinch()
-    {
-        Debug.Log("J$ StartPinch");
-        OnPinchStart?.Invoke();
-    }
-
-    private void EndPinch()
-    {
-        Debug.Log("J$ EndPinch");
-        OnPinchEnd?.Invoke();
-    }
-    */
 
     public Vector2 GetTouchPosition()
     {
@@ -119,5 +100,15 @@ public class PlayerController : MonoBehaviour
         Vector2 primaryPosition = inputControls.PlayerFarm.FirstPosition.ReadValue<Vector2>();
         Vector2 secondaryPosition = inputControls.PlayerFarm.SecondPosition.ReadValue<Vector2>();
         return Vector2.Distance(primaryPosition, secondaryPosition);
+    }
+
+    public void Select()
+    {
+        OnSelectPerformed?.Invoke();
+    }
+
+    public void SelectHold()
+    {
+        OnSelectHoldPerformed?.Invoke();
     }
 }

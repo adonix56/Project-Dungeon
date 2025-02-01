@@ -62,6 +62,24 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Select"",
+                    ""type"": ""Button"",
+                    ""id"": ""d3ccf556-fdef-42b9-84df-ba5ed7d101a2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectHold"",
+                    ""type"": ""Button"",
+                    ""id"": ""7bb748d1-d40f-4a6b-8147-8f48c373a9aa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -108,6 +126,28 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""action"": ""SecondPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c502d906-317b-4af9-97a8-c32d1d7c5f51"",
+                    ""path"": ""<Touchscreen>/Press"",
+                    ""interactions"": ""Tap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Select"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""89bb9e97-bba0-4e01-9f6d-738f3c642ccb"",
+                    ""path"": ""<Touchscreen>/Press"",
+                    ""interactions"": ""Hold"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectHold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -120,6 +160,8 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         m_PlayerFarm_FirstPosition = m_PlayerFarm.FindAction("FirstPosition", throwIfNotFound: true);
         m_PlayerFarm_SecondContact = m_PlayerFarm.FindAction("SecondContact", throwIfNotFound: true);
         m_PlayerFarm_SecondPosition = m_PlayerFarm.FindAction("SecondPosition", throwIfNotFound: true);
+        m_PlayerFarm_Select = m_PlayerFarm.FindAction("Select", throwIfNotFound: true);
+        m_PlayerFarm_SelectHold = m_PlayerFarm.FindAction("SelectHold", throwIfNotFound: true);
     }
 
     ~@InputControls()
@@ -190,6 +232,8 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerFarm_FirstPosition;
     private readonly InputAction m_PlayerFarm_SecondContact;
     private readonly InputAction m_PlayerFarm_SecondPosition;
+    private readonly InputAction m_PlayerFarm_Select;
+    private readonly InputAction m_PlayerFarm_SelectHold;
     public struct PlayerFarmActions
     {
         private @InputControls m_Wrapper;
@@ -198,6 +242,8 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         public InputAction @FirstPosition => m_Wrapper.m_PlayerFarm_FirstPosition;
         public InputAction @SecondContact => m_Wrapper.m_PlayerFarm_SecondContact;
         public InputAction @SecondPosition => m_Wrapper.m_PlayerFarm_SecondPosition;
+        public InputAction @Select => m_Wrapper.m_PlayerFarm_Select;
+        public InputAction @SelectHold => m_Wrapper.m_PlayerFarm_SelectHold;
         public InputActionMap Get() { return m_Wrapper.m_PlayerFarm; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -219,6 +265,12 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             @SecondPosition.started += instance.OnSecondPosition;
             @SecondPosition.performed += instance.OnSecondPosition;
             @SecondPosition.canceled += instance.OnSecondPosition;
+            @Select.started += instance.OnSelect;
+            @Select.performed += instance.OnSelect;
+            @Select.canceled += instance.OnSelect;
+            @SelectHold.started += instance.OnSelectHold;
+            @SelectHold.performed += instance.OnSelectHold;
+            @SelectHold.canceled += instance.OnSelectHold;
         }
 
         private void UnregisterCallbacks(IPlayerFarmActions instance)
@@ -235,6 +287,12 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             @SecondPosition.started -= instance.OnSecondPosition;
             @SecondPosition.performed -= instance.OnSecondPosition;
             @SecondPosition.canceled -= instance.OnSecondPosition;
+            @Select.started -= instance.OnSelect;
+            @Select.performed -= instance.OnSelect;
+            @Select.canceled -= instance.OnSelect;
+            @SelectHold.started -= instance.OnSelectHold;
+            @SelectHold.performed -= instance.OnSelectHold;
+            @SelectHold.canceled -= instance.OnSelectHold;
         }
 
         public void RemoveCallbacks(IPlayerFarmActions instance)
@@ -258,5 +316,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         void OnFirstPosition(InputAction.CallbackContext context);
         void OnSecondContact(InputAction.CallbackContext context);
         void OnSecondPosition(InputAction.CallbackContext context);
+        void OnSelect(InputAction.CallbackContext context);
+        void OnSelectHold(InputAction.CallbackContext context);
     }
 }
