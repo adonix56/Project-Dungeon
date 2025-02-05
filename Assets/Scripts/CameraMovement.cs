@@ -12,10 +12,10 @@ public class CameraMovement : MonoBehaviour
     private void Start()
     {
         cameraComp = GetComponent<Camera>();
-        GestureDetection.Instance.OnDragStart += DragStart;
-        GestureDetection.Instance.OnDragDistance += DragCamera;
-        GestureDetection.Instance.OnPinchStart += PinchStart;
-        GestureDetection.Instance.OnPinchDistance += PinchDistance;
+        //GestureDetection.Instance.OnDragStart += DragStart;
+        //GestureDetection.Instance.OnDragDistance += DragCamera;
+        //GestureDetection.Instance.OnPinchStart += PinchStart;
+        //GestureDetection.Instance.OnPinchDistance += PinchDistance;
     }
 
     private void DragStart()

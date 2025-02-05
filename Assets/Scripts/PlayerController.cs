@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -60,7 +61,8 @@ public class PlayerController : MonoBehaviour
             Debug.Log("J$ PlayerController StartDrag");
             primaryTouch = touchID;
             OnDragStart?.Invoke();
-        } else if (numTouches == 2) {
+        } else if (numTouches == 2)
+        {
             Debug.Log("J$ PlayerController StartPinch");
             OnPinchStart?.Invoke();
         }
@@ -110,5 +112,10 @@ public class PlayerController : MonoBehaviour
     public void SelectHold()
     {
         OnSelectHoldPerformed?.Invoke();
+    }
+
+    public bool IsInteractingWithUI()
+    {
+        return EventSystem.current.IsPointerOverGameObject();
     }
 }
