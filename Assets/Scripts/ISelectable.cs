@@ -5,4 +5,6 @@ public interface ISelectable
     public void Select();
 
     public void SelectHold();
+
+    public void EndSelect();
 }

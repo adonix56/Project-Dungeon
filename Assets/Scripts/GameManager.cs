@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     }
 
     private PlayerController playerController;
-    private GestureDetection gestureDetection;
+    //private GestureDetection gestureDetection;
     private Camera mainCamera;
     private GameState currentGameState = GameState.None;
 
@@ -28,6 +28,10 @@ public class GameManager : MonoBehaviour
     private bool tryPinching = false;
     private float startZoomSize;
     private float startPinchDistance;
+
+    [Header("Selectables")]
+    [SerializeField] private Canvas mainCanvas;
+    private ISelectable currentSelectable;
 
 
     private void Awake()
@@ -48,7 +52,9 @@ public class GameManager : MonoBehaviour
         playerController.OnDragEnd += EndDragging;
         playerController.OnPinchStart += StartPinching;
         playerController.OnPinchEnd += ResetGameState;
-        gestureDetection = GetComponent<GestureDetection>();
+        playerController.OnSelectPerformed += Select;
+        playerController.OnSelectHoldPerformed += SelectHold;
+        //gestureDetection = GetComponent<GestureDetection>();
         mainCamera = Camera.main;
     }
 
@@ -69,6 +75,38 @@ public class GameManager : MonoBehaviour
         tryPinching = true;
     }
 
+    private void Select()
+    {
+        if (HitInteractable(out ISelectable selectable))
+        {
+            EndSelect();
+            currentSelectable = selectable;
+            currentSelectable.Select();
+            Debug.Log("J$ PlayerController Select");
+        }
+    }
+
+    private void SelectHold()
+    {
+        if (HitInteractable(out ISelectable selectable))
+        {
+            EndSelect();
+            currentSelectable = selectable;
+            currentSelectable.SelectHold();
+            Debug.Log("J$ PlayerController Select Hold");
+            EndDragging();
+        }
+    }
+
+    private void EndSelect()
+    {
+        if (currentSelectable != null)
+        {
+            currentSelectable.EndSelect();
+            currentSelectable = null;
+        }
+    }
+
     private void ResetGameState()
     {
         currentGameState = GameState.None;
@@ -77,9 +115,16 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         if (tryPinching) {
-            startPinchDistance = playerController.GetPinchDistance();
-            startZoomSize = mainCamera.orthographicSize;
-            currentGameState = GameState.Pinching;
+            if (!EventSystem.current.IsPointerOverGameObject())
+            {
+                EndSelect();
+                startPinchDistance = playerController.GetPinchDistance();
+                startZoomSize = mainCamera.orthographicSize;
+                currentGameState = GameState.Pinching;
+            } else
+            {
+                ResetGameState();
+            }
             tryPinching = false;
         }
 
@@ -87,6 +132,7 @@ public class GameManager : MonoBehaviour
         {
             if (tryDragging && !EventSystem.current.IsPointerOverGameObject())
             {
+                EndSelect();
                 startDragPosition = playerController.GetTouchPosition();
                 startCameraPosition = mainCamera.transform.position;
                 currentGameState = GameState.Dragging;
@@ -102,6 +148,17 @@ public class GameManager : MonoBehaviour
         {
             ZoomCamera();
         }
+    }
+
+    public Canvas GetMainCanvas()
+    {
+        return mainCanvas;
+    }
+
+    public Vector2 GetCanvasPositionFromWorld(Vector3 worldPosition)
+    {
+        Vector3 pixelPosition = mainCamera.WorldToScreenPoint(worldPosition);
+        return Vector2.zero;
     }
 
     private IEnumerator DetectDrag()
@@ -128,5 +185,24 @@ public class GameManager : MonoBehaviour
     {
         float pinchDelta = startPinchDistance - playerController.GetPinchDistance();
         mainCamera.orthographicSize = startZoomSize + (pinchDelta * cameraZoomSpeed);
+    }
+
+    private bool HitInteractable(out ISelectable selectable)
+    {
+        Ray ray = mainCamera.ScreenPointToRay(playerController.GetTouchPosition());
+        selectable = null;
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
+        {
+            MonoBehaviour[] components = hitInfo.collider.gameObject.GetComponents<MonoBehaviour>();
+            foreach (var component in components)
+            {
+                if (component is ISelectable)
+                {
+                    selectable = (ISelectable)component;
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
