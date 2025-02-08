@@ -19,12 +19,16 @@ public class GameManager : MonoBehaviour
     [Header("Dragging")]
     [SerializeField] private float minDragDistance;
     [SerializeField] private float cameraMoveSpeed;
+    [SerializeField] private float angle;
     private bool tryDragging = false;
+    private bool isDragging = false;
     private Vector3 startCameraPosition;
     private Vector2 startDragPosition;
 
     [Header("Pinching")]
     [SerializeField] private float cameraZoomSpeed;
+    [SerializeField] private float minZoom;
+    [SerializeField] private float maxZoom;
     private bool tryPinching = false;
     private float startZoomSize;
     private float startPinchDistance;
@@ -67,6 +71,7 @@ public class GameManager : MonoBehaviour
     private void EndDragging()
     {
         //StopAllCoroutines();
+        isDragging = false;
         ResetGameState();
     }
 
@@ -88,6 +93,7 @@ public class GameManager : MonoBehaviour
 
     private void SelectHold()
     {
+        if (isDragging) return;
         if (HitInteractable(out ISelectable selectable))
         {
             EndSelect();
@@ -177,14 +183,27 @@ public class GameManager : MonoBehaviour
     {
         Vector2 moveVector = startDragPosition - playerController.GetTouchPosition();
         moveVector *= cameraMoveSpeed;
+        if (moveVector.magnitude > minDragDistance) isDragging = true;
+
         moveVector.y *= 1.2f; //TODO: currently hard coding the equalizing, calculate based on canvas size.
-        mainCamera.transform.position = startCameraPosition + new Vector3(moveVector.x, 0, moveVector.y);
+        //Rotate 45 deg
+        float radians = angle * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(radians);
+        float sin = Mathf.Sin(radians);
+        //Matrix multiplication
+        Vector2 rotatedMoveVector = new Vector2(
+            moveVector.x * cos - moveVector.y * sin, 
+            moveVector.x * sin + moveVector.y * cos
+        );
+
+        mainCamera.transform.position = startCameraPosition + new Vector3(rotatedMoveVector.x, 0, rotatedMoveVector.y);
     }
 
     private void ZoomCamera()
     {
         float pinchDelta = startPinchDistance - playerController.GetPinchDistance();
-        mainCamera.orthographicSize = startZoomSize + (pinchDelta * cameraZoomSpeed);
+        float calculatedZoom = startZoomSize + (pinchDelta * cameraZoomSpeed);
+        mainCamera.orthographicSize = Mathf.Clamp(calculatedZoom, minZoom, maxZoom);
     }
 
     private bool HitInteractable(out ISelectable selectable)
