@@ -1,5 +1,6 @@
 using System.Collections;
 using Unity.VisualScripting;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -37,6 +38,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Canvas mainCanvas;
     private ISelectable currentSelectable;
 
+    private ISelectable movingSelectable;
 
     private void Awake()
     {
@@ -55,7 +57,7 @@ public class GameManager : MonoBehaviour
         playerController.OnDragStart += StartDragging;
         playerController.OnDragEnd += EndDragging;
         playerController.OnPinchStart += StartPinching;
-        playerController.OnPinchEnd += ResetGameState;
+        playerController.OnPinchEnd += EndPinching;
         playerController.OnSelectPerformed += Select;
         playerController.OnSelectHoldPerformed += SelectHold;
         //gestureDetection = GetComponent<GestureDetection>();
@@ -78,6 +80,22 @@ public class GameManager : MonoBehaviour
     private void StartPinching()
     {
         tryPinching = true;
+    }
+
+    private void EndPinching()
+    {
+        ResetGameState();
+    }
+
+    public void StartMoving(ISelectable newMovingSelectable)
+    {
+        movingSelectable = newMovingSelectable;
+    }
+
+    public void EndMoving()
+    {
+        movingSelectable = null;
+        ResetGameState();
     }
 
     private void Select()
@@ -148,7 +166,13 @@ public class GameManager : MonoBehaviour
         }
         if (currentGameState == GameState.Dragging) 
         {
-            MoveCamera();
+            if (movingSelectable != null && HitInteractable(out ISelectable selectable) && selectable == movingSelectable) 
+            { 
+
+            } else
+            {
+                MoveCamera();
+            }
         }
         if (currentGameState == GameState.Pinching)
         {

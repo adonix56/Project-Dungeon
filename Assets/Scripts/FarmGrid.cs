@@ -32,7 +32,7 @@ public class FarmGrid : MonoBehaviour
         {
             for (int i = Mathf.RoundToInt(gridRect.x); i < Mathf.RoundToInt(gridRect.x) + gridRect.width; i += 2)
             {
-                for (int j = Mathf.RoundToInt(gridRect.y); j < Mathf.RoundToInt(gridRect.x) + gridRect.height; j += 2)
+                for (int j = Mathf.RoundToInt(gridRect.y); j < Mathf.RoundToInt(gridRect.y) + gridRect.height; j += 2)
                 {
                     Instantiate(placementSquare, new Vector3(i, 0.01f, j), Quaternion.identity, transform);
                 }

@@ -7,37 +7,79 @@ public class BasePlacement : MonoBehaviour, ISelectable
     protected const string DESTROY = "Destroy";
 
     [SerializeField] protected GameObject radialMenuPrefab;
-    [SerializeField] protected Transform radialMenuSpawnPoint;
-
-    protected Animator currentRadialMenu;
-    protected Canvas mainCanvas;
-    protected Camera mainCamera;
-
+    [SerializeField] protected GameObject confirmCancelPrefab;
+    [SerializeField] protected Transform UISpawnPoint;
     [SerializeField] protected Vector2Int placementLocation;
     [SerializeField] protected List<Vector2Int> placementSquares;
+    [SerializeField] protected Material selectorMaterial;
+    [SerializeField] protected Material invalidSelectorMaterial;
 
-    private void Start()
+    protected Animator currentRadialMenu;
+    protected ConfirmCancel currentConfirmCancel;
+    protected Canvas mainCanvas;
+    protected Camera mainCamera;
+    protected MeshRenderer mRenderer;
+    protected Material startMaterial;
+
+
+    protected virtual void Start()
     {
         mainCanvas = GameManager.Instance.GetMainCanvas();
         mainCamera = Camera.main;
+        mRenderer = GetComponent<MeshRenderer>();
+        startMaterial = mRenderer.material;
     }
 
-    public void Select()
+    public virtual void Select()
     {
 
     }
 
-    public void SelectHold()
+    public virtual void SelectHold()
     {
         Debug.Log("J$ BasePlacement Instantiate Radial");
-        GameObject radialMenuObject = Instantiate(radialMenuPrefab, mainCanvas.transform);
-        currentRadialMenu = radialMenuObject.GetComponent<Animator>();
-        RectTransform rectTransform = radialMenuObject.GetComponent<RectTransform>();
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(radialMenuSpawnPoint.position);
-        rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);
+        RadialFarm radialFarm = Instantiate(radialMenuPrefab, mainCanvas.transform).GetComponent<RadialFarm>();
+        currentRadialMenu = radialFarm.GetComponent<Animator>();
+        /*RectTransform rectTransform = radialFarm.GetComponent<RectTransform>();
+        Vector3 screenPos = mainCamera.WorldToScreenPoint(UISpawnPoint.position);
+        rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);*/
+        radialFarm.SetFollowTransform(UISpawnPoint);
+
+        radialFarm.OnMove += Move;
     }
 
-    public void EndSelect()
+    public virtual void Move()
+    {
+        Debug.Log("J$ BasePlacement Move");
+        EndSelect();
+        currentConfirmCancel = Instantiate(confirmCancelPrefab, mainCanvas.transform).GetComponent<ConfirmCancel>();
+        currentConfirmCancel.SetFollowTransform(UISpawnPoint);
+        mRenderer.material = selectorMaterial;
+
+        currentConfirmCancel.OnConfirm += ConfirmMove;
+        currentConfirmCancel.OnCancel += CancelMove;
+        GameManager.Instance.StartMoving(this);
+    }
+
+    public virtual void ConfirmMove()
+    {
+        EndMove();
+    }
+
+    public virtual void CancelMove()
+    {
+        EndMove();
+    }
+
+    public virtual void EndMove()
+    {
+        mRenderer.material = startMaterial;
+        Destroy(currentConfirmCancel.gameObject);
+        currentConfirmCancel = null;
+        GameManager.Instance.EndMoving();
+    }
+
+    public virtual void EndSelect()
     {
         if (currentRadialMenu != null)
         {
