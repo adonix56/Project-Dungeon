@@ -20,6 +20,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     protected Camera mainCamera;
     protected MeshRenderer mRenderer;
     protected Material startMaterial;
+    protected Vector3 dragOffset;
 
 
     protected virtual void Start()
@@ -45,10 +46,10 @@ public class BasePlacement : MonoBehaviour, ISelectable
         rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);*/
         radialFarm.SetFollowTransform(UISpawnPoint);
 
-        radialFarm.OnMove += Move;
+        radialFarm.OnMove += StartMove;
     }
 
-    public virtual void Move()
+    public virtual void StartMove()
     {
         Debug.Log("J$ BasePlacement Move");
         EndSelect();
@@ -59,6 +60,19 @@ public class BasePlacement : MonoBehaviour, ISelectable
         currentConfirmCancel.OnConfirm += ConfirmMove;
         currentConfirmCancel.OnCancel += CancelMove;
         GameManager.Instance.StartMoving(this);
+    }
+
+    public virtual void Move(Vector3 newLocation, bool newDragOffset)
+    {
+        if (newDragOffset)
+        {
+            dragOffset = new Vector3(newLocation.x, transform.position.y, newLocation.z);
+            dragOffset = transform.position - dragOffset;
+        } else
+        {
+            Vector3 newPos = new Vector3(newLocation.x, transform.position.y, newLocation.z);
+            transform.position = newPos + dragOffset;
+        }
     }
 
     public virtual void ConfirmMove()

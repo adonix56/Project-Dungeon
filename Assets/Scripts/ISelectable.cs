@@ -6,7 +6,9 @@ public interface ISelectable
 
     public void SelectHold();
 
-    public void Move();
+    public void StartMove();
+
+    public void Move(Vector3 newLocation, bool newDragOffset);
 
     public void EndSelect();
 }

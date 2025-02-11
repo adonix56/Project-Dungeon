@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float angle;
     private bool tryDragging = false;
     private bool isDragging = false;
+    private bool newDragOffset = true;
     private Vector3 startCameraPosition;
     private Vector2 startDragPosition;
 
@@ -36,6 +37,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Selectables")]
     [SerializeField] private Canvas mainCanvas;
+    [SerializeField] private LayerMask floorLayer;
     private ISelectable currentSelectable;
 
     private ISelectable movingSelectable;
@@ -74,6 +76,7 @@ public class GameManager : MonoBehaviour
     {
         //StopAllCoroutines();
         isDragging = false;
+        newDragOffset = true;
         ResetGameState();
     }
 
@@ -112,7 +115,7 @@ public class GameManager : MonoBehaviour
     private void SelectHold()
     {
         if (isDragging) return;
-        if (HitInteractable(out ISelectable selectable))
+        if (movingSelectable == null && HitInteractable(out ISelectable selectable))
         {
             EndSelect();
             currentSelectable = selectable;
@@ -126,6 +129,7 @@ public class GameManager : MonoBehaviour
     {
         if (currentSelectable != null)
         {
+            Debug.Log("J$ GameManager EndSelect from GM");
             currentSelectable.EndSelect();
             currentSelectable = null;
         }
@@ -167,8 +171,13 @@ public class GameManager : MonoBehaviour
         if (currentGameState == GameState.Dragging) 
         {
             if (movingSelectable != null && HitInteractable(out ISelectable selectable) && selectable == movingSelectable) 
-            { 
-
+            {
+                Ray ray = mainCamera.ScreenPointToRay(playerController.GetTouchPosition());
+                if (Physics.Raycast(ray, out RaycastHit hitInfo, 200f, floorLayer))
+                {
+                    movingSelectable.Move(hitInfo.point, newDragOffset);
+                    newDragOffset = false;
+                }
             } else
             {
                 MoveCamera();
