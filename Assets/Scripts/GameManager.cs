@@ -9,12 +9,11 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public enum GameState
     {
-        None, Dragging, Pinching, Select, SelectHold
+        None, Dragging, Pinching, Select, SelectHold, MovingObject
     }
 
     private PlayerController playerController;
-    //private GestureDetection gestureDetection;
-    private Camera mainCamera;
+    [SerializeField] private CameraManager cameraManager;
     private GameState currentGameState = GameState.None;
 
     [Header("Dragging")]
@@ -62,19 +61,21 @@ public class GameManager : MonoBehaviour
         playerController.OnPinchEnd += EndPinching;
         playerController.OnSelectPerformed += Select;
         playerController.OnSelectHoldPerformed += SelectHold;
-        //gestureDetection = GetComponent<GestureDetection>();
-        mainCamera = Camera.main;
     }
 
     private void StartDragging()
     {
-        //StopAllCoroutines();
-        tryDragging = true;
+        if (movingSelectable != null && HitInteractable(out ISelectable selectable) && selectable == movingSelectable)
+        {
+            currentGameState = GameState.MovingObject;
+        } else
+        {
+            tryDragging = true;
+        }
     }
 
     private void EndDragging()
     {
-        //StopAllCoroutines();
         isDragging = false;
         newDragOffset = true;
         ResetGameState();
@@ -147,7 +148,7 @@ public class GameManager : MonoBehaviour
             {
                 EndSelect();
                 startPinchDistance = playerController.GetPinchDistance();
-                startZoomSize = mainCamera.orthographicSize;
+                cameraManager.StartPinch();
                 currentGameState = GameState.Pinching;
             } else
             {
@@ -162,7 +163,7 @@ public class GameManager : MonoBehaviour
             {
                 EndSelect();
                 startDragPosition = playerController.GetTouchPosition();
-                startCameraPosition = mainCamera.transform.position;
+                cameraManager.StartDrag();
                 currentGameState = GameState.Dragging;
                 //StartCoroutine(DetectDrag());
             }
@@ -170,18 +171,11 @@ public class GameManager : MonoBehaviour
         }
         if (currentGameState == GameState.Dragging) 
         {
-            if (movingSelectable != null && HitInteractable(out ISelectable selectable) && selectable == movingSelectable) 
-            {
-                Ray ray = mainCamera.ScreenPointToRay(playerController.GetTouchPosition());
-                if (Physics.Raycast(ray, out RaycastHit hitInfo, 200f, floorLayer))
-                {
-                    movingSelectable.Move(hitInfo.point, newDragOffset);
-                    newDragOffset = false;
-                }
-            } else
-            {
-                MoveCamera();
-            }
+            MoveCamera();
+        }
+        if (currentGameState == GameState.MovingObject)
+        {
+            MoveObject();
         }
         if (currentGameState == GameState.Pinching)
         {
@@ -189,15 +183,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void MoveObject()
+    {
+        Vector2 currentPosition = playerController.GetTouchPosition();
+        Ray ray = cameraManager.GetRayFromScreen(currentPosition);
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, 200f, floorLayer))
+        {
+            movingSelectable.Move(hitInfo.point, newDragOffset);
+            newDragOffset = false;
+        }
+        cameraManager.CheckPanCamera(currentPosition);
+    }
+
     public Canvas GetMainCanvas()
     {
         return mainCanvas;
-    }
-
-    public Vector2 GetCanvasPositionFromWorld(Vector3 worldPosition)
-    {
-        Vector3 pixelPosition = mainCamera.WorldToScreenPoint(worldPosition);
-        return Vector2.zero;
     }
 
     private IEnumerator DetectDrag()
@@ -215,33 +215,21 @@ public class GameManager : MonoBehaviour
     private void MoveCamera()
     {
         Vector2 moveVector = startDragPosition - playerController.GetTouchPosition();
-        moveVector *= cameraMoveSpeed;
         if (moveVector.magnitude > minDragDistance) isDragging = true;
-
         moveVector.y *= 1.2f; //TODO: currently hard coding the equalizing, calculate based on canvas size.
-        //Rotate 45 deg
-        float radians = angle * Mathf.Deg2Rad;
-        float cos = Mathf.Cos(radians);
-        float sin = Mathf.Sin(radians);
-        //Matrix multiplication
-        Vector2 rotatedMoveVector = new Vector2(
-            moveVector.x * cos - moveVector.y * sin, 
-            moveVector.x * sin + moveVector.y * cos
-        );
-
-        mainCamera.transform.position = startCameraPosition + new Vector3(rotatedMoveVector.x, 0, rotatedMoveVector.y);
+        cameraManager.DragCamera(moveVector);
     }
 
     private void ZoomCamera()
     {
         float pinchDelta = startPinchDistance - playerController.GetPinchDistance();
         float calculatedZoom = startZoomSize + (pinchDelta * cameraZoomSpeed);
-        mainCamera.orthographicSize = Mathf.Clamp(calculatedZoom, minZoom, maxZoom);
+        cameraManager.ZoomCamera(calculatedZoom);
     }
 
     private bool HitInteractable(out ISelectable selectable)
     {
-        Ray ray = mainCamera.ScreenPointToRay(playerController.GetTouchPosition());
+        Ray ray = cameraManager.GetRayFromScreen(playerController.GetTouchPosition());
         selectable = null;
         if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
