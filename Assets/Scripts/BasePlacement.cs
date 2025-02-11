@@ -71,7 +71,10 @@ public class BasePlacement : MonoBehaviour, ISelectable
         } else
         {
             Vector3 newPos = new Vector3(newLocation.x, transform.position.y, newLocation.z);
-            transform.position = newPos + dragOffset;
+            newPos += dragOffset;
+            newPos.x = ClosestEven(newPos.x);
+            newPos.z = ClosestEven(newPos.z);
+            transform.position = newPos;
         }
     }
 
@@ -100,5 +103,16 @@ public class BasePlacement : MonoBehaviour, ISelectable
             currentRadialMenu.SetTrigger(DESTROY);
             currentRadialMenu = null;
         }
+    }
+
+    private int ClosestEven(float value)
+    {
+        int rounded = Mathf.RoundToInt(value);
+        if (rounded % 2 != 0)
+        {
+            if (value > rounded) return rounded + 1;
+            return rounded - 1;
+        }
+        return rounded;
     }
 }
