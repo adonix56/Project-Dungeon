@@ -58,12 +58,10 @@ public class PlayerController : MonoBehaviour
         numTouches++;
         if (numTouches == 1)
         {
-            Debug.Log("J$ PlayerController StartDrag");
             primaryTouch = touchID;
             OnDragStart?.Invoke();
         } else if (numTouches == 2)
         {
-            Debug.Log("J$ PlayerController StartPinch");
             OnPinchStart?.Invoke();
         }
     }
@@ -73,12 +71,10 @@ public class PlayerController : MonoBehaviour
         numTouches--;
         if (numTouches == 0)
         {
-            Debug.Log("J$ PlayerController EndDrag");
             primaryTouch = TouchID.None;
             OnDragEnd?.Invoke();
         } else if (numTouches == 1)
         {
-            Debug.Log("J$ PlayerController EndPinch StartDrag");
             primaryTouch = touchID == TouchID.Drag ? TouchID.Pinch : TouchID.Drag;
             OnPinchEnd?.Invoke();
             OnDragStart?.Invoke();

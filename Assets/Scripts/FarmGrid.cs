@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class FarmGrid : MonoBehaviour
 {
+    public static FarmGrid Instance { get; private set; }
     [SerializeField] private int xSize;
     [SerializeField] private int ySize;
     [SerializeField] private Transform zeroZero;
@@ -11,9 +13,25 @@ public class FarmGrid : MonoBehaviour
 
     [Header("TESTING")]
     [SerializeField] private bool visualizeGrid;
+    [SerializeField] private Material gridSquareMaterial;
     
     private Rect gridRect;
     private Dictionary<Vector2Int, bool> grid;
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this; 
+        gridRect.x = zeroZero.position.x;
+        gridRect.y = zeroZero.position.z;
+        gridRect.width = xSize * 2;
+        gridRect.height = ySize * 2;
+        grid = new Dictionary<Vector2Int, bool>();
+    }
 
     private void Start()
     {
@@ -22,19 +40,14 @@ public class FarmGrid : MonoBehaviour
 
     private void SetupGrid()
     {
-        grid = new Dictionary<Vector2Int, bool>();
-        gridRect.x = zeroZero.position.x;
-        gridRect.y = zeroZero.position.z;
-        gridRect.width = xSize * 2;
-        gridRect.height = ySize * 2;
-
         if (visualizeGrid)
         {
             for (int i = Mathf.RoundToInt(gridRect.x); i < Mathf.RoundToInt(gridRect.x) + gridRect.width; i += 2)
             {
                 for (int j = Mathf.RoundToInt(gridRect.y); j < Mathf.RoundToInt(gridRect.y) + gridRect.height; j += 2)
                 {
-                    Instantiate(placementSquare, new Vector3(i, 0.01f, j), Quaternion.identity, transform);
+                    MeshRenderer mRenderer = Instantiate(placementSquare, new Vector3(i, 0.01f, j), Quaternion.identity, transform).GetComponent<MeshRenderer>();
+                    mRenderer.material = gridSquareMaterial;
                 }
             }
         }
@@ -56,7 +69,8 @@ public class FarmGrid : MonoBehaviour
     public bool TrySetSpot(Vector2Int spot, bool value)
     {
         if (!gridRect.Contains(spot)) return false;
-        grid[spot] = value;
+        if (!grid.ContainsKey(spot)) grid.Add(spot, value);
+        else grid[spot] = value;
         return true;
     }
 }
