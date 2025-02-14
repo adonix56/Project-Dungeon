@@ -1,0 +1,130 @@
+{
+	"Version": 3,
+	"Parameters": [
+		{
+			"Id": "Param",
+			"GroupId": "",
+			"Name": "eye x"
+		},
+		{
+			"Id": "Param2",
+			"GroupId": "",
+			"Name": "eye Y"
+		},
+		{
+			"Id": "eyeOpenL",
+			"GroupId": "",
+			"Name": "eyeOpenL"
+		},
+		{
+			"Id": "eyeOpenR",
+			"GroupId": "",
+			"Name": "eyeOpenR"
+		},
+		{
+			"Id": "Param3",
+			"GroupId": "",
+			"Name": "swing bucket"
+		},
+		{
+			"Id": "Param6",
+			"GroupId": "",
+			"Name": "swing bucket 2"
+		},
+		{
+			"Id": "Param4",
+			"GroupId": "",
+			"Name": "bucket physics"
+		},
+		{
+			"Id": "Param5",
+			"GroupId": "",
+			"Name": "bucket physics 2"
+		},
+		{
+			"Id": "Param7",
+			"GroupId": "",
+			"Name": "bangs physics"
+		},
+		{
+			"Id": "Param8",
+			"GroupId": "",
+			"Name": "bang R physics"
+		},
+		{
+			"Id": "Param10",
+			"GroupId": "",
+			"Name": "back of hair physics"
+		},
+		{
+			"Id": "Param9",
+			"GroupId": "",
+			"Name": "idle"
+		},
+		{
+			"Id": "Param11",
+			"GroupId": "",
+			"Name": "ear twitch"
+		},
+		{
+			"Id": "Param12",
+			"GroupId": "",
+			"Name": "ear twitch"
+		},
+		{
+			"Id": "Param13",
+			"GroupId": "",
+			"Name": "apron physics"
+		},
+		{
+			"Id": "Param14",
+			"GroupId": "",
+			"Name": "bow physics"
+		},
+		{
+			"Id": "Param15",
+			"GroupId": "",
+			"Name": "left arm movement"
+		},
+		{
+			"Id": "Param16",
+			"GroupId": "",
+			"Name": "legs bend"
+		},
+		{
+			"Id": "Param17",
+			"GroupId": "",
+			"Name": "walking"
+		},
+		{
+			"Id": "Param18",
+			"GroupId": "",
+			"Name": "walking cycle"
+		}
+	],
+	"ParameterGroups": [],
+	"Parts": [
+		{
+			"Id": "Part",
+			"Name": "hairline.psd"
+		}
+	],
+	"CombinedParameters": [
+		[
+			"Param",
+			"Param2"
+		],
+		[
+			"Param3",
+			"Param6"
+		],
+		[
+			"Param4",
+			"Param5"
+		],
+		[
+			"Param11",
+			"Param12"
+		]
+	]
+}

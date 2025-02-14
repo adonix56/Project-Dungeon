@@ -1,0 +1,23 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "cow girl sprite.moc3",
+		"Textures": [
+			"cow girl sprite.4096/texture_00.png"
+		],
+		"Physics": "cow girl sprite.physics3.json",
+		"DisplayInfo": "cow girl sprite.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		}
+	]
+}
