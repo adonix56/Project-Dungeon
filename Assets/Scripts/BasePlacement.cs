@@ -38,7 +38,8 @@ public class BasePlacement : MonoBehaviour, ISelectable
         mFilter = GetComponent<MeshFilter>();
         startMaterial = mRenderer.material;
         placementSquareObjects = new List<PlacementSquare>();
-        InitializePlacement();
+        //InitializePlacement();
+        SetPlaceableValues(true);
     }
 
     private void OnDisable()
@@ -49,6 +50,11 @@ public class BasePlacement : MonoBehaviour, ISelectable
             {
                 placementSquare.OnValidChanged -= PlacementChanged;
             }
+        }
+        if (currentConfirmCancel != null)
+        {
+            currentConfirmCancel.OnConfirm -= ConfirmMove;
+            currentConfirmCancel.OnCancel -= CancelMove;
         }
     }
 
@@ -61,6 +67,11 @@ public class BasePlacement : MonoBehaviour, ISelectable
                 Debug.Log("J$ BasePlacement subscribing to placementSquare OnValidChanged event");
                 placementSquare.OnValidChanged += PlacementChanged;
             }
+        }
+        if (currentConfirmCancel != null)
+        {
+            currentConfirmCancel.OnConfirm += ConfirmMove;
+            currentConfirmCancel.OnCancel += CancelMove;
         }
     }
 
@@ -110,6 +121,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
         currentConfirmCancel.SetFollowTransform(midpoint);
         mRenderer.material = selectorMaterial;
 
+        SetPlaceableValues(false);
         BuildPlacementSquares();
 
         currentConfirmCancel.OnConfirm += ConfirmMove;
@@ -189,26 +201,34 @@ public class BasePlacement : MonoBehaviour, ISelectable
         return rounded;
     }
 
-    private void InitializePlacement()
-    {
-        foreach (Vector2Int location in placementSquares)
-        {
-            Vector3Int intPosition = Vector3Int.RoundToInt(transform.position);
-            Vector2Int initialPosition = new Vector2Int(intPosition.x + placementLocation.x + location.x, intPosition.z + placementLocation.y + location.y);
-            FarmGrid.Instance.TrySetSpot(initialPosition, true);
-        }
-    }
-
     private void BuildPlacementSquares()
     {
         foreach (Vector2Int location in placementSquares)
         {
-            Vector3 spawnLocation = new Vector3(location.x + placementLocation.x, 0f, location.y + placementLocation.y);
-            spawnLocation = transform.position + spawnLocation;
+            Vector3 spawnLocation = ConvertPlacementToWorld(location);
             PlacementSquare curPlacementSquare = Instantiate(placementSquarePrefab, spawnLocation, Quaternion.identity, transform).GetComponent<PlacementSquare>();
             placementSquareObjects.Add(curPlacementSquare);
             curPlacementSquare.OnValidChanged += PlacementChanged;
         }
+    }
+
+    private void SetPlaceableValues(bool newValue)
+    {
+        foreach (Vector2Int location in placementSquares)
+        {
+            Vector3 initialPosition = ConvertPlacementToWorld(location);
+            Vector2Int setSpotPosition = Vector2Int.RoundToInt(new Vector2(initialPosition.x, initialPosition.z));
+            //Debug.Log($"J$ BasePlacement Setting {setSpotPosition} to {newValue}");
+            FarmGrid.Instance.TrySetSpot(setSpotPosition, newValue);
+        }
+    }
+
+    private Vector3 ConvertPlacementToWorld(Vector2Int location)
+    {
+        Vector3 retLocation = transform.position;
+        retLocation.x += location.x + placementLocation.x;
+        retLocation.z += location.y + placementLocation.y;
+        return retLocation;
     }
 
     private void PlacementChanged(bool newValue)

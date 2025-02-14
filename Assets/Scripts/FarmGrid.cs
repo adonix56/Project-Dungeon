@@ -66,11 +66,11 @@ public class FarmGrid : MonoBehaviour
         return !grid.GetValueOrDefault(spot, false);
     }
 
-    public bool TrySetSpot(Vector2Int spot, bool value)
+    public bool TrySetSpot(Vector2Int spot, bool occupied)
     {
         if (!gridRect.Contains(spot)) return false;
-        if (!grid.ContainsKey(spot)) grid.Add(spot, value);
-        else grid[spot] = value;
+        if (!grid.ContainsKey(spot)) grid.Add(spot, occupied);
+        else grid[spot] = occupied;
         return true;
     }
 }
