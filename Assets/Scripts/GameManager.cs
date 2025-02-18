@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     [Header("Selectables")]
     [SerializeField] private Canvas mainCanvas;
     [SerializeField] private LayerMask floorLayer;
+    private FarmUI farmUI;
     private ISelectable currentSelectable;
 
     private ISelectable movingSelectable;
@@ -60,6 +61,7 @@ public class GameManager : MonoBehaviour
         playerController.OnPinchEnd += EndPinching;
         playerController.OnSelectPerformed += Select;
         playerController.OnSelectHoldPerformed += SelectHold;
+        farmUI = mainCanvas.GetComponent<FarmUI>();
     }
 
     private void StartDragging()
@@ -77,7 +79,7 @@ public class GameManager : MonoBehaviour
     {
         isDragging = false;
         newDragOffset = true;
-        ResetGameState();
+        if (currentGameState == GameState.Dragging || currentGameState == GameState.MovingObject) ResetGameState();
     }
 
     private void StartPinching()
@@ -104,36 +106,50 @@ public class GameManager : MonoBehaviour
     private void Select()
     {
         if (playerController.IsInteractingWithUI()) return;
+        if (currentGameState == GameState.Select) return;
         if (movingSelectable == null && HitInteractable(out ISelectable selectable))
         {
-            EndSelect();
+            EndSelectHold();
             currentSelectable = selectable;
             currentSelectable.Select();
+            farmUI.BackButtonSetActive(true);
+            currentGameState = GameState.Select;
             Debug.Log("J$ PlayerController Select");
         }
+    }
+
+    public void EndSelect()
+    {
+        cameraManager.ZoomOut();
+        farmUI.BackButtonSetActive(false);
+        currentGameState = GameState.None;
+        currentSelectable = null;
     }
 
     private void SelectHold()
     {
         if (playerController.IsInteractingWithUI()) return;
+        if (currentGameState == GameState.Select) return;
         if (isDragging) return;
         if (movingSelectable == null && HitInteractable(out ISelectable selectable))
         {
-            EndSelect();
+            EndSelectHold();
             currentSelectable = selectable;
             currentSelectable.SelectHold();
+            currentGameState = GameState.SelectHold;
             Debug.Log("J$ PlayerController Select Hold");
             EndDragging();
         }
     }
 
-    private void EndSelect()
+    private void EndSelectHold()
     {
         if (currentSelectable != null)
         {
             Debug.Log("J$ GameManager EndSelect from GM");
             currentSelectable.EndSelect();
             currentSelectable = null;
+            currentGameState = GameState.None;
         }
     }
 
@@ -147,7 +163,7 @@ public class GameManager : MonoBehaviour
         if (tryPinching) {
             if (!playerController.IsInteractingWithUI())
             {
-                EndSelect();
+                EndSelectHold();
                 startPinchDistance = playerController.GetPinchDistance();
                 cameraManager.StartPinch();
                 currentGameState = GameState.Pinching;
@@ -162,7 +178,7 @@ public class GameManager : MonoBehaviour
         {
             if (tryDragging && !playerController.IsInteractingWithUI())
             {
-                EndSelect();
+                EndSelectHold();
                 startDragPosition = playerController.GetTouchPosition();
                 cameraManager.StartDrag();
                 currentGameState = GameState.Dragging;

@@ -120,6 +120,18 @@ public class CameraManager : MonoBehaviour
         //cameraComp.transform.position = targetCameraPosition;
     }
 
+    public void ZoomOut()
+    {
+        float swap = targetOrthographicSize;
+        targetOrthographicSize = oldOrthographicSize;
+        oldOrthographicSize = swap;
+        Vector3 swapV3 = targetCameraPosition;
+        targetCameraPosition = oldCameraPosition;
+        oldCameraPosition = swapV3;
+        transitionTime = 0f;
+        selectZoom = true;
+    }
+
     private float CalculateScaleFactor(Bounds objectBounds)
     {
         screenSize = new Vector2(Screen.width, Screen.height);
