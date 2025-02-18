@@ -2,10 +2,19 @@ using UnityEngine;
 
 public class FarmUI : MonoBehaviour
 {
-    [SerializeField] private GameObject backButton;
+    private const string DEACTIVATE = "Deactivate";
 
-    public void BackButtonSetActive(bool active)
+    [SerializeField] private Animator selectUI;
+
+    public enum UIObject {
+        None, SelectUI
+    }
+
+    public void SetUIObjectActive(UIObject obj, bool active)
     {
-        backButton.SetActive(active);
+        if (obj == UIObject.SelectUI) { 
+            if (active) selectUI.gameObject.SetActive(true);
+            if (!active) selectUI.SetTrigger(DEACTIVATE);
+        }
     }
 }

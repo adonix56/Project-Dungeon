@@ -112,7 +112,7 @@ public class GameManager : MonoBehaviour
             EndSelectHold();
             currentSelectable = selectable;
             currentSelectable.Select();
-            farmUI.BackButtonSetActive(true);
+            farmUI.SetUIObjectActive(FarmUI.UIObject.SelectUI, true);
             currentGameState = GameState.Select;
             Debug.Log("J$ PlayerController Select");
         }
@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
     public void EndSelect()
     {
         cameraManager.ZoomOut();
-        farmUI.BackButtonSetActive(false);
+        farmUI.SetUIObjectActive(FarmUI.UIObject.SelectUI, false);
         currentGameState = GameState.None;
         currentSelectable = null;
     }
