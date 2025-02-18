@@ -21,19 +21,21 @@ public class BasePlacement : MonoBehaviour, ISelectable
     protected ConfirmCancel currentConfirmCancel;
     protected Canvas mainCanvas;
     protected Camera mainCamera;
+    protected CameraManager cameraManager;
     protected MeshRenderer mRenderer;
     protected MeshFilter mFilter;
     protected Material startMaterial;
     protected Vector3 dragOffset;
     protected GameObject oldPlacement;
     protected List<PlacementSquare> placementSquareObjects;
-    protected int numValidSquares;
+    protected int numInvalidSquares;
 
 
     protected virtual void Start()
     {
         mainCanvas = GameManager.Instance.GetMainCanvas();
         mainCamera = Camera.main;
+        cameraManager = mainCamera.GetComponent<CameraManager>();
         mRenderer = GetComponent<MeshRenderer>();
         mFilter = GetComponent<MeshFilter>();
         startMaterial = mRenderer.material;
@@ -77,6 +79,9 @@ public class BasePlacement : MonoBehaviour, ISelectable
 
     public virtual void Select()
     {
+        //Debug.Log($"{mRenderer.bounds}");
+        cameraManager.ZoomToObjectOnLeft(mRenderer.bounds);
+        
     }
 
     public virtual void SelectHold()
@@ -95,7 +100,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     public virtual void StartMove()
     {
         EndSelect();
-        
+
         if (oldPlacement != null) Destroy(oldPlacement);
 
         oldPlacement = new GameObject($"{name}_Move");
@@ -112,7 +117,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
             MeshFilter newMFilter = oldPlacement.AddComponent<MeshFilter>();
             newMFilter.sharedMesh = mFilter.sharedMesh;
         }
-        
+
         currentConfirmCancel = Instantiate(confirmCancelPrefab, mainCanvas.transform).GetComponent<ConfirmCancel>();
         //Bug fix. Set the anchored position before the next frame renders.
         RectTransform rectTransform = currentConfirmCancel.GetComponent<RectTransform>();
@@ -153,13 +158,18 @@ public class BasePlacement : MonoBehaviour, ISelectable
 
     public virtual void ConfirmMove()
     {
-        EndMove();
+        if (CanPlaceObject())
+        {
+            SetPlaceableValues(true);
+            EndMove();
+        }
     }
 
     public virtual void CancelMove()
     {
         transform.position = oldPlacement.transform.position;
         transform.rotation = oldPlacement.transform.rotation;
+        SetPlaceableValues(true);
         EndMove();
     }
 
@@ -174,6 +184,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
         {
             Destroy(placementSquare.gameObject);
         }
+        numInvalidSquares = 0;
         placementSquareObjects.Clear();
         mRenderer.material = startMaterial;
         Destroy(currentConfirmCancel.gameObject);
@@ -212,14 +223,14 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
-    private void SetPlaceableValues(bool newValue)
+    private void SetPlaceableValues(bool occupied)
     {
         foreach (Vector2Int location in placementSquares)
         {
             Vector3 initialPosition = ConvertPlacementToWorld(location);
             Vector2Int setSpotPosition = Vector2Int.RoundToInt(new Vector2(initialPosition.x, initialPosition.z));
             //Debug.Log($"J$ BasePlacement Setting {setSpotPosition} to {newValue}");
-            FarmGrid.Instance.TrySetSpot(setSpotPosition, newValue);
+            FarmGrid.Instance.TrySetSpot(setSpotPosition, occupied);
         }
     }
 
@@ -233,9 +244,13 @@ public class BasePlacement : MonoBehaviour, ISelectable
 
     private void PlacementChanged(bool newValue)
     {
-        if (newValue) numValidSquares--;
-        else numValidSquares++;
-        if (numValidSquares > 0) mRenderer.material = invalidSelectorMaterial;
+        if (newValue) numInvalidSquares--;
+        else numInvalidSquares++;
+        if (numInvalidSquares > 0) mRenderer.material = invalidSelectorMaterial;
         else mRenderer.material = selectorMaterial;
+    }
+
+    private bool CanPlaceObject() { 
+        return numInvalidSquares <= 0; 
     }
 }

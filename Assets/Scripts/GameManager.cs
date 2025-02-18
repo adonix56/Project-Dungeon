@@ -103,7 +103,8 @@ public class GameManager : MonoBehaviour
 
     private void Select()
     {
-        if (HitInteractable(out ISelectable selectable))
+        if (playerController.IsInteractingWithUI()) return;
+        if (movingSelectable == null && HitInteractable(out ISelectable selectable))
         {
             EndSelect();
             currentSelectable = selectable;
@@ -114,6 +115,7 @@ public class GameManager : MonoBehaviour
 
     private void SelectHold()
     {
+        if (playerController.IsInteractingWithUI()) return;
         if (isDragging) return;
         if (movingSelectable == null && HitInteractable(out ISelectable selectable))
         {
@@ -143,7 +145,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         if (tryPinching) {
-            if (!EventSystem.current.IsPointerOverGameObject())
+            if (!playerController.IsInteractingWithUI())
             {
                 EndSelect();
                 startPinchDistance = playerController.GetPinchDistance();
@@ -158,7 +160,7 @@ public class GameManager : MonoBehaviour
 
         if (currentGameState == GameState.None)
         {
-            if (tryDragging && !EventSystem.current.IsPointerOverGameObject())
+            if (tryDragging && !playerController.IsInteractingWithUI())
             {
                 EndSelect();
                 startDragPosition = playerController.GetTouchPosition();
