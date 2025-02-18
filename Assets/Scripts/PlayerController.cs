@@ -114,4 +114,9 @@ public class PlayerController : MonoBehaviour
     {
         return EventSystem.current.IsPointerOverGameObject();
     }
+
+    public void TESTING()
+    {
+        Debug.Log($"J$ PlayerController MousePosition {GetTouchPosition()}");
+    }
 }
