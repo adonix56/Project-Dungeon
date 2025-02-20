@@ -7,9 +7,11 @@ public class BasePlacement : MonoBehaviour, ISelectable
 {
     protected const string DESTROY = "Destroy";
 
+    [SerializeField] protected SelectableSO selectableSO;
     [SerializeField] protected GameObject radialMenuPrefab;
     [SerializeField] protected GameObject confirmCancelPrefab;
     [SerializeField] protected GameObject placementSquarePrefab;
+    [SerializeField] protected MeshRenderer meshRenderer;
     [SerializeField] protected Transform midpoint;
     [SerializeField] protected Vector2Int placementLocation;
     [SerializeField] protected List<Vector2Int> placementSquares;
@@ -22,7 +24,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     protected Canvas mainCanvas;
     protected Camera mainCamera;
     protected CameraManager cameraManager;
-    protected MeshRenderer mRenderer;
+    //protected MeshRenderer mRenderer;
     protected MeshFilter mFilter;
     protected Material startMaterial;
     protected Vector3 dragOffset;
@@ -36,9 +38,8 @@ public class BasePlacement : MonoBehaviour, ISelectable
         mainCanvas = GameManager.Instance.GetMainCanvas();
         mainCamera = Camera.main;
         cameraManager = mainCamera.GetComponent<CameraManager>();
-        mRenderer = GetComponent<MeshRenderer>();
-        mFilter = GetComponent<MeshFilter>();
-        startMaterial = mRenderer.material;
+        mFilter = meshRenderer.gameObject.GetComponent<MeshFilter>();
+        startMaterial = meshRenderer.material;
         placementSquareObjects = new List<PlacementSquare>();
         //InitializePlacement();
         SetPlaceableValues(true);
@@ -77,11 +78,18 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
-    public virtual void Select()
+    public SelectableSO Select()
     {
         //Debug.Log($"{mRenderer.bounds}");
-        cameraManager.ZoomToObjectOnLeft(mRenderer.bounds);
-        
+        Bounds meshBounds = meshRenderer.bounds;
+        meshBounds.center = midpoint.position;
+        cameraManager.ZoomToObjectOnLeft(meshBounds);
+        return selectableSO;
+    }
+
+    public void EndSelect()
+    {
+        cameraManager.ZoomOut();
     }
 
     public virtual void SelectHold()
@@ -99,17 +107,17 @@ public class BasePlacement : MonoBehaviour, ISelectable
 
     public virtual void StartMove()
     {
-        EndSelect();
+        EndSelectHold();
 
         if (oldPlacement != null) Destroy(oldPlacement);
 
         oldPlacement = new GameObject($"{name}_Move");
         oldPlacement.transform.position = transform.position;
         oldPlacement.transform.rotation = transform.rotation;
-        if (mRenderer != null)
+        if (meshRenderer != null)
         {
             MeshRenderer newMRenderer = oldPlacement.AddComponent<MeshRenderer>();
-            newMRenderer.sharedMaterials = mRenderer.sharedMaterials;
+            newMRenderer.sharedMaterials = meshRenderer.sharedMaterials;
             newMRenderer.material = dimMaterial;
         }
         if (mFilter != null)
@@ -124,7 +132,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
         Vector3 screenPos = mainCamera.WorldToScreenPoint(midpoint.position);
         rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);
         currentConfirmCancel.SetFollowTransform(midpoint);
-        mRenderer.material = selectorMaterial;
+        meshRenderer.material = selectorMaterial;
 
         SetPlaceableValues(false);
         BuildPlacementSquares();
@@ -186,13 +194,13 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
         numInvalidSquares = 0;
         placementSquareObjects.Clear();
-        mRenderer.material = startMaterial;
+        meshRenderer.material = startMaterial;
         Destroy(currentConfirmCancel.gameObject);
         currentConfirmCancel = null;
         GameManager.Instance.EndMoving();
     }
 
-    public virtual void EndSelect()
+    public virtual void EndSelectHold()
     {
         if (currentRadialMenu != null)
         {
@@ -246,8 +254,8 @@ public class BasePlacement : MonoBehaviour, ISelectable
     {
         if (newValue) numInvalidSquares--;
         else numInvalidSquares++;
-        if (numInvalidSquares > 0) mRenderer.material = invalidSelectorMaterial;
-        else mRenderer.material = selectorMaterial;
+        if (numInvalidSquares > 0) meshRenderer.material = invalidSelectorMaterial;
+        else meshRenderer.material = selectorMaterial;
     }
 
     private bool CanPlaceObject() { 

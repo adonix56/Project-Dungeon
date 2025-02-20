@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LayerMask floorLayer;
     private FarmUI farmUI;
     private ISelectable currentSelectable;
+    private SelectableSO currentSelectableSO;
 
     private ISelectable movingSelectable;
 
@@ -111,8 +112,8 @@ public class GameManager : MonoBehaviour
         {
             EndSelectHold();
             currentSelectable = selectable;
-            currentSelectable.Select();
-            farmUI.SetUIObjectActive(FarmUI.UIObject.SelectUI, true);
+            currentSelectableSO = currentSelectable.Select();
+            farmUI.SetUIObjectActive(currentSelectableSO, true);
             currentGameState = GameState.Select;
             Debug.Log("J$ PlayerController Select");
         }
@@ -120,10 +121,11 @@ public class GameManager : MonoBehaviour
 
     public void EndSelect()
     {
-        cameraManager.ZoomOut();
-        farmUI.SetUIObjectActive(FarmUI.UIObject.SelectUI, false);
+        farmUI.SetUIObjectActive(currentSelectableSO, false);
         currentGameState = GameState.None;
+        currentSelectable.EndSelect();
         currentSelectable = null;
+        currentSelectableSO = null;
     }
 
     private void SelectHold()
@@ -147,7 +149,7 @@ public class GameManager : MonoBehaviour
         if (currentSelectable != null)
         {
             Debug.Log("J$ GameManager EndSelect from GM");
-            currentSelectable.EndSelect();
+            currentSelectable.EndSelectHold();
             currentSelectable = null;
             currentGameState = GameState.None;
         }
