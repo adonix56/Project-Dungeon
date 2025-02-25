@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UITitle: Garden Soil
   UIObject: 2
-  entryPrefab: {fileID: 0}
+  entryPrefab:
+  - {fileID: 0}
+  - {fileID: 0}

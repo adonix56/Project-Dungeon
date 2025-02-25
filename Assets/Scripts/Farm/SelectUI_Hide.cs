@@ -18,6 +18,10 @@ public class SelectUI_Hide : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.gameObject.SetActive(false);
+        if (animator.transform.parent.TryGetComponent<FarmUI>(out FarmUI farmUI))
+        {
+            farmUI.EmptyContainer();
+        }
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()

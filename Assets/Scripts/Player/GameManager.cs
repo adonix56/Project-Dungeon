@@ -40,8 +40,10 @@ public class GameManager : MonoBehaviour
     private FarmUI farmUI;
     private ISelectable currentSelectable;
     private SelectableSO currentSelectableSO;
-
     private ISelectable movingSelectable;
+
+    [Header("Inventory")]
+    [SerializeField] private Inventory inventory;
 
     private void Awake()
     {
@@ -113,7 +115,7 @@ public class GameManager : MonoBehaviour
             EndSelectHold();
             currentSelectable = selectable;
             currentSelectableSO = currentSelectable.Select();
-            farmUI.SetUIObjectActive(currentSelectableSO, true);
+            farmUI.SetUIObjectActive(true, FarmUI.UIObject.SelectUI, currentSelectableSO);
             currentGameState = GameState.Select;
             Debug.Log("J$ PlayerController Select");
         }
@@ -121,7 +123,7 @@ public class GameManager : MonoBehaviour
 
     public void EndSelect()
     {
-        farmUI.SetUIObjectActive(currentSelectableSO, false);
+        farmUI.SetUIObjectActive(false, FarmUI.UIObject.SelectUI, currentSelectableSO);
         currentGameState = GameState.None;
         currentSelectable.EndSelect();
         currentSelectable = null;
@@ -263,5 +265,10 @@ public class GameManager : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public Inventory GetInventory()
+    {
+        return inventory;
     }
 }

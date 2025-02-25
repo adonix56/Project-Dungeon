@@ -21,7 +21,7 @@ public class BaseObjectUI : MonoBehaviour
         if (followTransform)
         {
             Vector3 screenPos = mainCamera.WorldToScreenPoint(followTransform.position);
-            rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, parentCanvas);
+            rectTransform.anchoredPosition = Utils.GetCanvasPositionFromScreenPoint(screenPos, parentCanvas);
         }
     }
 

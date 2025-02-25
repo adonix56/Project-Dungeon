@@ -22,6 +22,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     protected Animator currentRadialMenu;
     protected ConfirmCancel currentConfirmCancel;
     protected Canvas mainCanvas;
+    protected FarmUI farmUI;
     protected Camera mainCamera;
     protected CameraManager cameraManager;
     //protected MeshRenderer mRenderer;
@@ -36,6 +37,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     protected virtual void Start()
     {
         mainCanvas = GameManager.Instance.GetMainCanvas();
+        farmUI = mainCanvas.GetComponent<FarmUI>();
         mainCamera = Camera.main;
         cameraManager = mainCamera.GetComponent<CameraManager>();
         mFilter = meshRenderer.gameObject.GetComponent<MeshFilter>();
@@ -78,7 +80,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
-    public SelectableSO Select()
+    public virtual SelectableSO Select()
     {
         //Debug.Log($"{mRenderer.bounds}");
         Bounds meshBounds = meshRenderer.bounds;
@@ -130,7 +132,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
         //Bug fix. Set the anchored position before the next frame renders.
         RectTransform rectTransform = currentConfirmCancel.GetComponent<RectTransform>();
         Vector3 screenPos = mainCamera.WorldToScreenPoint(midpoint.position);
-        rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);
+        rectTransform.anchoredPosition = Utils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);
         currentConfirmCancel.SetFollowTransform(midpoint);
         meshRenderer.material = selectorMaterial;
 
