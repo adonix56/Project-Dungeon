@@ -3,23 +3,26 @@ using UnityEngine;
 public class InventoryUI : MonoBehaviour
 {
     [SerializeField] private Transform itemContainer;
-    [SerializeField] private ItemsWrapper items;
+    [SerializeField] private ItemsWrapper inventoryItems;
 
     public void InitializeInventoryUI(bool active)
     {
         Inventory inventory = GameManager.Instance.GetInventory();
-        ItemsWrapper items = inventory.GetAllInventoryItems();
-        int itemCount = items.Count;
         if (active)
         {
-            for (int i = 0; i < itemCount; i++)
+            inventoryItems = inventory.GetAllInventoryItems();
+            for (int i = 0; i < inventoryItems.Count; i++)
             {
                 Transform child = itemContainer.GetChild(i);
-                Utils.FillItem(child, items.Get(i));
+                Utils.FillItem(child, inventoryItems.Get(i));
             }
         } else
         {
-            //TODO: Empty Items
+            for (int i = 0; i < inventoryItems.Count; i++)
+            {
+                Utils.EmptyItem(itemContainer.GetChild(i));
+            }
+            inventoryItems.Clear();
         }
     }
 }

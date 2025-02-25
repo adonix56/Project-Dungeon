@@ -35,6 +35,8 @@ public class ItemsWrapper
     public List<Tuple<InventoryItemSO, InventoryItem>> items = new List<Tuple<InventoryItemSO, InventoryItem>>();
     public int Count { get { return items.Count; } }
     public Tuple<InventoryItemSO, InventoryItem> Get(int index) {  return items[index]; }
+    public void Add(InventoryItemSO itemSO, InventoryItem item) { items.Add(new Tuple<InventoryItemSO, InventoryItem>(itemSO, item)); }
+    public void Clear() { items.Clear(); }
 }
 
 public class Utils : MonoBehaviour

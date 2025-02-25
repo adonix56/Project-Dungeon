@@ -28,10 +28,6 @@ public class FarmUI : MonoBehaviour
         None, MainUI, SelectUI, InventoryUI, FilterUI
     }
 
-    private void Start()
-    {
-    }
-
     public void SetUIObjectActive(bool active, UIObject uiObject, SelectableSO obj = null)
     {
         //Debug.Log($"J$ FarmUI {obj.UIObject.ToString()} {active}");

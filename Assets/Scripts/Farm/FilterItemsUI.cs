@@ -48,7 +48,7 @@ public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
             for (int i = 0; i < itemCount; i++)
             {
                 Transform child = itemContainer.GetChild(i);
-                AddItem(items.Get(i).Item1);
+                filteredItems.Add(items.Get(i).Item1);
                 Utils.FillItem(child, items.Get(i));
             }
         } else
@@ -57,17 +57,7 @@ public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
             {
                 Utils.EmptyItem(itemContainer.GetChild(i));
             }
-            ClearItems();
+            filteredItems.Clear();
         }
-    }
-
-    public void AddItem(InventoryItemSO item) 
-    { 
-        filteredItems.Add(item);
-    }
-
-    public void ClearItems()
-    {
-        filteredItems.Clear();
     }
 }
