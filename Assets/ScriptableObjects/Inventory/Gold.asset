@@ -16,6 +16,5 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: d27ac6cfdb67049f79c092866ed0a916, type: 3}
   description: Currency used to purchase things in this world.
   category: 0
-  hasQuality: 0
-  lowValue: 1
-  highValue: 1
+  dataA: 1
+  dataB: 0

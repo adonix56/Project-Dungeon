@@ -16,6 +16,5 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 5b34ff53f11e041b2af34be2a2dfbc66, type: 3}
   description: A mystical plant that screams when harvested. My eardrums....
   category: 1
-  hasQuality: 1
-  lowValue: 100
-  highValue: 400
+  dataA: 150
+  dataB: 400

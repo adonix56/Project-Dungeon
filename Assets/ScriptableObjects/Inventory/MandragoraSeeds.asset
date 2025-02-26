@@ -16,6 +16,5 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 87e545da95ffc49ea962e18d86f7ee3f, type: 3}
   description: Seeds used to grow Mandragoras.
   category: 2
-  hasQuality: 0
-  lowValue: 200
-  highValue: 0
+  dataA: 200
+  dataB: 300

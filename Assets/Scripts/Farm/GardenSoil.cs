@@ -11,6 +11,7 @@ public class GardenSoil : BasePlacement
     private GameObject itemPrefab;
     [SerializeField]
     private GameObject itemEmptyPrefab;
+    private Action<InventoryItemSO> currentFilterAction;
 
     protected override void Start()
     {
@@ -20,10 +21,10 @@ public class GardenSoil : BasePlacement
     public override SelectableSO Select() 
     {
         SelectableSO ret = base.Select();
-        foreach (GardenSoilItem item in items)
+        for (int i = 0; i < items.Count; i++)
         {
             FarmItem newItem;
-            if (item.IsEmpty()) 
+            if (items[i].IsEmpty()) 
             {
                 newItem = farmUI.AddItemToSelectContainer(itemEmptyPrefab);
                 newItem.OnClick += EmptyOnClick;
@@ -32,19 +33,44 @@ public class GardenSoil : BasePlacement
                 newItem = farmUI.AddItemToSelectContainer(itemPrefab);
                 newItem.OnClick += GrowingOnClick;
             }
-            item.SetFarmItem(newItem);
+            items[i] = new GardenSoilItem(items[i], newItem);
         }
         return ret;
     }
 
-    private void GrowingOnClick()
+    private void GrowingOnClick(FarmItem clickedItem)
     {
-        Debug.Log("J$ GardenSoil GrowingOnClick");
+        int currentSiblingIndex = clickedItem.transform.GetSiblingIndex();
+        if (items[currentSiblingIndex].CanBeHarvested())
+        {
+            Debug.Log($"J$ GardenSoil: Can harvest!");
+        } else
+            Debug.Log($"J$ GardenSoil: Cannot harvest!");
     }
 
-    private void EmptyOnClick()
+    private void EmptyOnClick(FarmItem clickedItem)
     {
         farmUI.ToggleFilter(InventoryCategory.Seeds, true);
+        currentFilterAction = (filtered) => FarmUI_OnFilterSelected(filtered, clickedItem);
+        farmUI.OnFilterSelected += currentFilterAction;
+    }
+
+    private void FarmUI_OnFilterSelected(InventoryItemSO obj, FarmItem clickedItem)
+    {
+        farmUI.OnFilterSelected -= currentFilterAction;
+        currentFilterAction = null;
+
+        // Replace FarmItem from Empty to Active
+        int currentSiblingIndex = clickedItem.transform.GetSiblingIndex();
+        Destroy(items[currentSiblingIndex].obj.gameObject);
+        FarmItem newItem = farmUI.AddItemToSelectContainer(itemPrefab);
+        newItem.OnClick += GrowingOnClick;
+        newItem.transform.SetSiblingIndex(currentSiblingIndex);
+
+        // Point the new items[currentSiblingIndex] to the new struct
+        GardenSoilItem newGardenSoilItem = new GardenSoilItem(obj.itemName, DateTime.Now, DateTime.Now.AddSeconds(obj.dataB)); //dataB corresponds to seconds until harvest
+        newItem.SetValues(newGardenSoilItem.name, obj.description, newGardenSoilItem.GetTimeLeft(), "0", obj.sprite, newGardenSoilItem.GetPercentageLeft());
+        items[currentSiblingIndex] = newGardenSoilItem;
     }
 }
 
@@ -66,6 +92,15 @@ public struct GardenSoilItem
         obj = null;
     }
 
+    public GardenSoilItem(GardenSoilItem copy, FarmItem newFarmObject)
+    {
+        name = copy.name;
+        startTime = copy.startTime;
+        endTime = copy.endTime;
+        harvested = copy.harvested;
+        obj = newFarmObject;
+    }
+
     public bool IsEmpty()
     {
         return harvested;
@@ -76,9 +111,24 @@ public struct GardenSoilItem
         return DateTime.Now > endTime;
     }
 
-    public void SetFarmItem(FarmItem newItem)
+    public string GetTimeLeft()
     {
-        obj = newItem;
+        DateTime currentTime = DateTime.Now;
+        TimeSpan timeDifference = endTime - currentTime;
+        int totalHours = (int)timeDifference.TotalHours;
+        int totalMinutes = timeDifference.Minutes;
+        int totalSeconds = timeDifference.Seconds;
+
+        return string.Format("{0:D2}:{1:D2}:{2:D2}", totalHours, totalMinutes, totalSeconds);
+    }
+
+    public float GetPercentageLeft()
+    {
+        DateTime currentTime = DateTime.Now;
+        TimeSpan totalDifference = endTime - startTime;
+        TimeSpan currentDifference = endTime - currentTime;
+
+        return (float)((totalDifference.TotalSeconds - currentDifference.TotalSeconds) / totalDifference.TotalSeconds);
     }
 }
 

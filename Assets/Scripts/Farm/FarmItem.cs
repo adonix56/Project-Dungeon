@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class FarmItem : MonoBehaviour
 {
-    public event Action OnClick;
+    public event Action<FarmItem> OnClick;
 
     [SerializeField] private TextMeshProUGUI itemName;
     [SerializeField] private TextMeshProUGUI itemDescription;
@@ -21,13 +21,13 @@ public class FarmItem : MonoBehaviour
     private void Start()
     {
         IsSecondaryActive = true;
-        GetComponent<Button>().onClick.AddListener(() => OnClick?.Invoke());
+        GetComponent<Button>().onClick.AddListener(() => OnClick?.Invoke(this));
     }
 
     public void SetValues(string itemName = "", string itemDescription = "", string timeLeft = "", string secondaryTimeLeft = "", Sprite icon = null, float percentageTimeLeft = 0f)
     {
         this.itemName.text = itemName;
-        this.itemDescription.text = itemDescription;
+        //this.itemDescription.text = itemDescription;
         timeLeftText.text = timeLeft;
         secondaryTimeLeftText.text = secondaryTimeLeft;
         this.icon.sprite = icon;
@@ -51,6 +51,4 @@ public class FarmItem : MonoBehaviour
         secondaryInactiveObject.SetActive(!active);
         secondaryTimeLeftText.text = secondaryTimeLeft;
     }
-
-    
 }

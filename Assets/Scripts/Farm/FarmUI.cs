@@ -23,6 +23,7 @@ public class FarmUI : MonoBehaviour
 
     [Header("FilterUI")]
     [SerializeField] private FilterItemsUI filterUI;
+    public event Action<InventoryItemSO> OnFilterSelected;
 
     public enum UIObject {
         None, MainUI, SelectUI, InventoryUI, FilterUI
@@ -49,8 +50,15 @@ public class FarmUI : MonoBehaviour
             inventoryUI.gameObject.SetActive(active);
         } else if (uiObject == UIObject.FilterUI)
         {
+            if (!active) filterUI.OnSelectedItem -= FilterUI_OnSelectedItem;
             filterUI.gameObject.SetActive(active);
+            if (active) filterUI.OnSelectedItem += FilterUI_OnSelectedItem;
         }
+    }
+
+    private void FilterUI_OnSelectedItem(InventoryItemSO selectedFilterItem)
+    {
+        OnFilterSelected?.Invoke(selectedFilterItem);
     }
 
     public void ToggleInventory(bool active)

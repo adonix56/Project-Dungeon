@@ -60,7 +60,7 @@ public class Inventory : MonoBehaviour
         List<InventoryItem> itemList = inventoryItems[useItem];
         int index = 0;
         InventoryItem item = itemList[index];
-        if (useItem.hasQuality)
+        if (useItem.HasQuality())
         {
             //TODO: Handle Quality usage
         }

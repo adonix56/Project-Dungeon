@@ -7,19 +7,25 @@ public class InventoryItemSO : ScriptableObject
     public Sprite sprite;
     public string description;
     public InventoryCategory category;
-    public bool hasQuality;
-    public int lowValue;
-    public int highValue;
+    [Tooltip("Usually cost to purchase. For items with Quality, dataA corresponds to the sell price for Quality 0.")]
+    public int dataA;
+    [Tooltip("For items with Quality, dataB corresponds to the sell price for Quality 100.\n\nFor Seeds, dataB corresponds to the number of seconds until harvest.")]
+    public int dataB;
 
     public int GetCost(int quality)
     {
         int addition = 0;
-        if (hasQuality)
+        if (HasQuality())
         {
-            int difference = highValue - lowValue;
+            int difference = dataB - dataA;
             float qualityScale = (float)quality / 100f;
             addition = Mathf.FloorToInt(qualityScale * (float) difference);
         }
-        return lowValue + addition;
+        return dataA + addition;
+    }
+
+    public bool HasQuality()
+    {
+        return category == InventoryCategory.Harvest;
     }
 }

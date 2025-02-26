@@ -5,6 +5,8 @@ using UnityEngine.EventSystems;
 
 public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
 {
+    public event Action<InventoryItemSO> OnSelectedItem;
+
     [SerializeField] private Transform itemContainer;
     [SerializeField] private List<InventoryItemSO> filteredItems;
     private FarmUI farmUI;
@@ -34,6 +36,7 @@ public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
                 Debug.LogError($"J$ FilterItemsUI Failed to use {filteredItems[index].itemName}");
             }
             // Replace Empty UI prefab with farm UI prefab
+            OnSelectedItem?.Invoke(filteredItems[index]);
             ExitFilter();
         }
     }
