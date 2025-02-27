@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9871ea81c222a544b91ea90e2de8712, type: 3}
   m_Name: Shed
   m_EditorClassIdentifier: 
-  UITitle: Shed
-  UIObject: 2
-  entryPrefab: {fileID: 0}
+  title: Shed
