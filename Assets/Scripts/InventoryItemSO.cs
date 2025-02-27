@@ -11,6 +11,8 @@ public class InventoryItemSO : ScriptableObject
     public int dataA;
     [Tooltip("For items with Quality, dataB corresponds to the sell price for Quality 100.\n\nFor Seeds, dataB corresponds to the number of seconds until harvest.")]
     public int dataB;
+    [Tooltip("For Seeds, the Connected Inventory Item corresponds to the Harvest object that it grows.")]
+    public InventoryItemSO connectedInventoryItem;
 
     public int GetCost(int quality)
     {

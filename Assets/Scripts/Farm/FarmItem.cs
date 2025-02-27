@@ -16,6 +16,9 @@ public class FarmItem : MonoBehaviour
     [SerializeField] private GameObject secondaryActiveObject;
     [SerializeField] private GameObject secondaryInactiveObject;
 
+    private GardenSoilItem currentGardenSoilItem;
+    private bool gardenSoilActive;
+
     public bool IsSecondaryActive { get; private set; }
 
     private void Start()
@@ -24,7 +27,16 @@ public class FarmItem : MonoBehaviour
         GetComponent<Button>().onClick.AddListener(() => OnClick?.Invoke(this));
     }
 
-    public void SetValues(string itemName = "", string itemDescription = "", string timeLeft = "", string secondaryTimeLeft = "", Sprite icon = null, float percentageTimeLeft = 0f)
+    private void Update()
+    {
+        if (gardenSoilActive)
+        {
+            timeLeftText.text = currentGardenSoilItem.GetTimeLeft();
+            timerSlider.value = currentGardenSoilItem.GetPercentageLeft();
+        }
+    }
+
+    /*public void SetValues(string itemName = "", string itemDescription = "", string timeLeft = "", string secondaryTimeLeft = "", Sprite icon = null, float percentageTimeLeft = 0f)
     {
         this.itemName.text = itemName;
         //this.itemDescription.text = itemDescription;
@@ -32,6 +44,17 @@ public class FarmItem : MonoBehaviour
         secondaryTimeLeftText.text = secondaryTimeLeft;
         this.icon.sprite = icon;
         timerSlider.value = percentageTimeLeft;
+    }*/
+
+    public void PlantSeeds(GardenSoilItem gardenSoilItem)
+    {
+        currentGardenSoilItem = gardenSoilItem;
+        InventoryItemSO harvestPlant = gardenSoilItem.inventoryItemSO.connectedInventoryItem;
+        itemName.text = harvestPlant.itemName;
+        timeLeftText.text = currentGardenSoilItem.GetTimeLeft();
+        icon.sprite = harvestPlant.sprite;
+        timerSlider.value = currentGardenSoilItem.GetPercentageLeft();
+        gardenSoilActive = true;
     }
 
     public void SetDescription(string itemDescription)
