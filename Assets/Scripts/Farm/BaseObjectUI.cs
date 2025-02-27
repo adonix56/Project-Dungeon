@@ -1,5 +1,15 @@
+/* 
+ * File: BaseObjectUI.cs
+ * Project: Project Dungeon
+ * Author: Justin Salanga
+ * Date: 02/19/2025 
+ */
+
 using UnityEngine;
 
+/// <summary>
+/// Dynamic UI objects placed in the world.
+/// </summary>
 public class BaseObjectUI : MonoBehaviour
 {
     [SerializeField] protected Transform followTransform;
@@ -25,11 +35,18 @@ public class BaseObjectUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Makes the UI object follow a specific object.
+    /// </summary>
+    /// <param name="followTarget">Object to follow.</param>
     public void SetFollowTransform(Transform followTarget)
     {
         followTransform = followTarget;
     }
 
+    /// <summary>
+    /// A public function to destroy itself. Allows destruction of object in Animator.
+    /// </summary>
     public void PublicDestroy()
     {
         Destroy(gameObject);

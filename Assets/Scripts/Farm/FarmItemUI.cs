@@ -1,11 +1,24 @@
+/* 
+ * File: FarmItemUI.cs
+ * Project: Project Dungeon
+ * Author: Justin Salanga
+ * Date: 02/25/2025 
+ */
+
 using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FarmItem : MonoBehaviour
+/// <summary>
+/// A singular UI element inside a SelectUI container.
+/// </summary>
+public class FarmItemUI : MonoBehaviour
 {
-    public event Action<FarmItem> OnClick;
+    /// <summary>
+    /// Event triggered when the farm item is clicked.
+    /// </summary>
+    public event Action<FarmItemUI> OnClick;
 
     [SerializeField] private TextMeshProUGUI itemName;
     [SerializeField] private TextMeshProUGUI itemDescription;
@@ -19,6 +32,9 @@ public class FarmItem : MonoBehaviour
     private GardenSoilItem currentGardenSoilItem;
     private bool gardenSoilActive;
 
+    /// <summary>
+    /// Gets a value indicating whether the secondary action is active.
+    /// </summary>
     public bool IsSecondaryActive { get; private set; }
 
     private void Start()
@@ -29,6 +45,7 @@ public class FarmItem : MonoBehaviour
 
     private void Update()
     {
+        // Update GUI when active
         if (gardenSoilActive)
         {
             timeLeftText.text = currentGardenSoilItem.GetTimeLeft();
@@ -36,20 +53,14 @@ public class FarmItem : MonoBehaviour
         }
     }
 
-    /*public void SetValues(string itemName = "", string itemDescription = "", string timeLeft = "", string secondaryTimeLeft = "", Sprite icon = null, float percentageTimeLeft = 0f)
-    {
-        this.itemName.text = itemName;
-        //this.itemDescription.text = itemDescription;
-        timeLeftText.text = timeLeft;
-        secondaryTimeLeftText.text = secondaryTimeLeft;
-        this.icon.sprite = icon;
-        timerSlider.value = percentageTimeLeft;
-    }*/
-
+    /// <summary>
+    /// When planting seeds, this function updates the state of the UI elements.
+    /// </summary>
+    /// <param name="gardenSoilItem"></param>
     public void PlantSeeds(GardenSoilItem gardenSoilItem)
     {
         currentGardenSoilItem = gardenSoilItem;
-        InventoryItemSO harvestPlant = gardenSoilItem.inventoryItemSO.connectedInventoryItem;
+        InventoryItemSO harvestPlant = gardenSoilItem.seedItemSO.connectedInventoryItem;
         itemName.text = harvestPlant.itemName;
         timeLeftText.text = currentGardenSoilItem.GetTimeLeft();
         icon.sprite = harvestPlant.sprite;
@@ -57,17 +68,31 @@ public class FarmItem : MonoBehaviour
         gardenSoilActive = true;
     }
 
+    /// <summary>
+    /// Sets the description text of the farm item.
+    /// </summary>
+    /// <param name="itemDescription">The description text to set.</param>
     public void SetDescription(string itemDescription)
     {
         this.itemDescription.text = itemDescription;
     }
 
+    /// <summary>
+    /// Sets the time left text and slider value.
+    /// </summary>
+    /// <param name="timeLeft">The time left text to set. Default is "".</param>
+    /// <param name="percentageTimeLeft">The percentage of time left to set. Default is 0.</param>
     public void SetSliderValue(string timeLeft = "", float percentageTimeLeft = 0f)
     {
         timeLeftText.text = timeLeft;
         timerSlider.value = percentageTimeLeft;
     }
 
+    /// <summary>
+    /// Sets the secondary action state and the secondary time left text.
+    /// </summary>
+    /// <param name="active">Whether the secondary action is active.</param>
+    /// <param name="secondaryTimeLeft">The secondary time left text to set. Default is "".</param>
     public void SetSecondaryTimer(bool active, string secondaryTimeLeft = "")
     {
         secondaryActiveObject.SetActive(active);

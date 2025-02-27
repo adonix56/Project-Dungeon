@@ -1,8 +1,16 @@
-using System;
+/* 
+ * File: BasePlacement.cs
+ * Project: Project Dungeon
+ * Author: Justin Salanga
+ * Date: 02/08/2025 
+ */
+
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
+/// <summary>
+/// Base class for farm placement objects.
+/// </summary>
 public class BasePlacement : MonoBehaviour, ISelectable
 {
     protected const string DESTROY = "Destroy";
@@ -43,7 +51,6 @@ public class BasePlacement : MonoBehaviour, ISelectable
         mFilter = meshRenderer.gameObject.GetComponent<MeshFilter>();
         startMaterial = meshRenderer.material;
         placementSquareObjects = new List<PlacementSquare>();
-        //InitializePlacement();
         SetPlaceableValues(true);
     }
 
@@ -80,42 +87,52 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
+    /// <summary>
+    /// Executed when object is selected.
+    /// </summary>
+    /// <returns>The selectable's corresponding scriptable object.</returns>
     public virtual SelectableSO Select()
     {
-        //Debug.Log($"{mRenderer.bounds}");
         Bounds meshBounds = meshRenderer.bounds;
         meshBounds.center = midpoint.position;
         cameraManager.ZoomToObjectOnLeft(meshBounds);
         return selectableSO;
     }
 
+    /// <summary>
+    /// Executed when select process is ended.
+    /// </summary>
     public void EndSelect()
     {
         cameraManager.ZoomOut();
     }
 
+    /// <summary>
+    /// Executed when object is select holded.
+    /// </summary>
     public virtual void SelectHold()
     {
-        Debug.Log("J$ BasePlacement Instantiate Radial");
         RadialFarm radialFarm = Instantiate(radialMenuPrefab, mainCanvas.transform).GetComponent<RadialFarm>();
         currentRadialMenu = radialFarm.GetComponent<Animator>();
-        /*RectTransform rectTransform = radialFarm.GetComponent<RectTransform>();
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(UISpawnPoint.position);
-        rectTransform.anchoredPosition = CanvasUtils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);*/
         radialFarm.SetFollowTransform(midpoint);
 
         radialFarm.OnMove += StartMove;
     }
 
+    /// <summary>
+    /// Executed when attempting to move the object.
+    /// </summary>
     public virtual void StartMove()
     {
         EndSelectHold();
 
+        // Create copy of current instance to show its current placement
         if (oldPlacement != null) Destroy(oldPlacement);
-
         oldPlacement = new GameObject($"{name}_Move");
+        // Copy the transform values
         oldPlacement.transform.position = transform.position;
         oldPlacement.transform.rotation = transform.rotation;
+        // Copy the visuals
         if (meshRenderer != null)
         {
             MeshRenderer newMRenderer = oldPlacement.AddComponent<MeshRenderer>();
@@ -129,13 +146,17 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
 
         currentConfirmCancel = Instantiate(confirmCancelPrefab, mainCanvas.transform).GetComponent<ConfirmCancel>();
-        //Bug fix. Set the anchored position before the next frame renders.
+
+        // Bug fix. Set the anchored position before the next frame renders.
         RectTransform rectTransform = currentConfirmCancel.GetComponent<RectTransform>();
         Vector3 screenPos = mainCamera.WorldToScreenPoint(midpoint.position);
         rectTransform.anchoredPosition = Utils.GetCanvasPositionFromScreenPoint(screenPos, mainCanvas);
+
+        // Set object to follow cursor
         currentConfirmCancel.SetFollowTransform(midpoint);
         meshRenderer.material = selectorMaterial;
 
+        // Display viable placement squares
         SetPlaceableValues(false);
         BuildPlacementSquares();
 
@@ -144,16 +165,22 @@ public class BasePlacement : MonoBehaviour, ISelectable
         GameManager.Instance.StartMoving(this);
     }
 
+    /// <summary>
+    /// Move object to accepted new location.
+    /// </summary>
+    /// <param name="newLocation">New location to move the object</param>
+    /// <param name="newDragOffset">True sets up the offset from the location to the cursor, False to change the location of the object.</param>
     public virtual void Move(Vector3 newLocation, bool newDragOffset)
     {
-        if (newDragOffset)
+        if (newDragOffset) // Set the offset from the object to the cursor
         {
             dragOffset = new Vector3(newLocation.x, transform.position.y, newLocation.z);
             dragOffset = transform.position - dragOffset;
-        } else
+        } else // Move the object to the cursor location
         {
             Vector3 newPos = new Vector3(newLocation.x, transform.position.y, newLocation.z);
             newPos += dragOffset;
+            // Grid squares are 2x2 so find the closest even position.
             newPos.x = ClosestEven(newPos.x);
             newPos.z = ClosestEven(newPos.z);
             if (transform.position != newPos)
@@ -166,6 +193,9 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
+    /// <summary>
+    /// Permanently move the farm object if there are no red squares.
+    /// </summary>
     public virtual void ConfirmMove()
     {
         if (CanPlaceObject())
@@ -175,6 +205,9 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
+    /// <summary>
+    /// Move the current location to the previously stored location and rotation.
+    /// </summary>
     public virtual void CancelMove()
     {
         transform.position = oldPlacement.transform.position;
@@ -183,6 +216,9 @@ public class BasePlacement : MonoBehaviour, ISelectable
         EndMove();
     }
 
+    /// <summary>
+    /// Ends the move process and performs cleanup of extraneous objects.
+    /// </summary>
     public virtual void EndMove()
     {
         if (oldPlacement != null)
@@ -202,6 +238,9 @@ public class BasePlacement : MonoBehaviour, ISelectable
         GameManager.Instance.EndMoving();
     }
 
+    /// <summary>
+    /// Executed when ending select hold.
+    /// </summary>
     public virtual void EndSelectHold()
     {
         if (currentRadialMenu != null)
@@ -211,6 +250,11 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
+    /// <summary>
+    /// Calculates the closest even integer.
+    /// </summary>
+    /// <param name="value">Float value to find the closest even integer.</param>
+    /// <returns>The closest even integer.</returns>
     private int ClosestEven(float value)
     {
         int rounded = Mathf.RoundToInt(value);
@@ -222,6 +266,9 @@ public class BasePlacement : MonoBehaviour, ISelectable
         return rounded;
     }
 
+    /// <summary>
+    /// Spawns placement squares based on the spawn locations.
+    /// </summary>
     private void BuildPlacementSquares()
     {
         foreach (Vector2Int location in placementSquares)
@@ -233,17 +280,25 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
     }
 
+    /// <summary>
+    /// Registers the current placement spawn locations as occupied to the FarmGrid.
+    /// </summary>
+    /// <param name="occupied"></param>
     private void SetPlaceableValues(bool occupied)
     {
         foreach (Vector2Int location in placementSquares)
         {
             Vector3 initialPosition = ConvertPlacementToWorld(location);
             Vector2Int setSpotPosition = Vector2Int.RoundToInt(new Vector2(initialPosition.x, initialPosition.z));
-            //Debug.Log($"J$ BasePlacement Setting {setSpotPosition} to {newValue}");
             FarmGrid.Instance.TrySetSpot(setSpotPosition, occupied);
         }
     }
 
+    /// <summary>
+    /// Converts placement spawn local coordinates to world coordinates.
+    /// </summary>
+    /// <param name="location">Location to convert to world coordinates in Vector2Int</param>
+    /// <returns>The Vector3 world position of the converted position.</returns>
     private Vector3 ConvertPlacementToWorld(Vector2Int location)
     {
         Vector3 retLocation = transform.position;
@@ -252,6 +307,10 @@ public class BasePlacement : MonoBehaviour, ISelectable
         return retLocation;
     }
 
+    /// <summary>
+    /// Executed when a placement square has changed its value.
+    /// </summary>
+    /// <param name="newValue">True for a valid square, False for an invalid square.</param>
     private void PlacementChanged(bool newValue)
     {
         if (newValue) numInvalidSquares--;
@@ -260,6 +319,10 @@ public class BasePlacement : MonoBehaviour, ISelectable
         else meshRenderer.material = selectorMaterial;
     }
 
+    /// <summary>
+    /// Determines whether the object can be placed in the current location.
+    /// </summary>
+    /// <returns>True if the object can be placed; other, false.</returns>
     private bool CanPlaceObject() { 
         return numInvalidSquares <= 0; 
     }

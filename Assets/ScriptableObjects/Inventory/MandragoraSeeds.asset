@@ -17,4 +17,5 @@ MonoBehaviour:
   description: Seeds used to grow Mandragoras.
   category: 2
   dataA: 200
-  dataB: 300
+  dataB: 10
+  connectedInventoryItem: {fileID: 11400000, guid: ea6644761b4a82a48bc4a665a8786779, type: 2}

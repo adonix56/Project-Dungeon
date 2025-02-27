@@ -1,10 +1,21 @@
-using System;
+/* 
+ * File: FarmGrid.cs
+ * Project: Project Dungeon
+ * Author: Justin Salanga
+ * Date: 02/08/2025 
+ */
+
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
+/// <summary>
+/// Handles the overall grid placements of farm objects.
+/// </summary>
 public class FarmGrid : MonoBehaviour
 {
+    /// <summary>
+    /// Singleton instance of FarmGrid.
+    /// </summary>
     public static FarmGrid Instance { get; private set; }
     [SerializeField] private int xSize;
     [SerializeField] private int ySize;
@@ -20,6 +31,7 @@ public class FarmGrid : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton logic
         if (Instance != null)
         {
             Destroy(this);
@@ -38,6 +50,9 @@ public class FarmGrid : MonoBehaviour
         SetupGrid();
     }
 
+    /// <summary>
+    /// Spawns placement squares to visually show the bounds of the grid.
+    /// </summary>
     private void SetupGrid()
     {
         if (visualizeGrid)
@@ -53,6 +68,11 @@ public class FarmGrid : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets new values of the grid.
+    /// </summary>
+    /// <param name="width">New width to be set.</param>
+    /// <param name="length">New height to be set.</param>
     public void SetNewGridSize(int width, int length)
     {
         xSize = width;
@@ -60,12 +80,23 @@ public class FarmGrid : MonoBehaviour
         //TODO: Reset grid and set the placements of objects
     }
 
+    /// <summary>
+    /// Checks if a spot on the grid can be placed.
+    /// </summary>
+    /// <param name="spot">A Vector2Int location to check if placement is available.</param>
+    /// <returns>True if the spot can be placed; otherwise, false.</returns>
     public bool CanPlaceSpot(Vector2Int spot)
     {
         if (!gridRect.Contains(spot)) return false;
         return !grid.GetValueOrDefault(spot, false);
     }
 
+    /// <summary>
+    /// Attempts to set a new value to a location on the grid.
+    /// </summary>
+    /// <param name="spot">A Vector2Int location to set a new value.</param>
+    /// <param name="occupied">True if the spot is to be occupied; false for available.</param>
+    /// <returns>True if the spot can be changed; otherwise, false.</returns>
     public bool TrySetSpot(Vector2Int spot, bool occupied)
     {
         if (!gridRect.Contains(spot)) return false;

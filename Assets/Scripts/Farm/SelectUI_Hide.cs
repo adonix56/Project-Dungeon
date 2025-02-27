@@ -1,3 +1,10 @@
+/* 
+ * File: SelectUI_Hide.cs
+ * Project: Project Dungeon
+ * Author: Justin Salanga
+ * Date: 02/18/2025 
+ */
+
 using UnityEngine;
 
 public class SelectUI_Hide : StateMachineBehaviour
@@ -20,7 +27,7 @@ public class SelectUI_Hide : StateMachineBehaviour
         animator.gameObject.SetActive(false);
         if (animator.transform.parent.TryGetComponent<FarmUI>(out FarmUI farmUI))
         {
-            farmUI.EmptyContainer();
+            farmUI.EmptySelectContainer();
         }
     }
 

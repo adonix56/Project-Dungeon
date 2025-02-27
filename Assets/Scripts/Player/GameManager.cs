@@ -1,12 +1,24 @@
-using System.Collections;
-using Unity.VisualScripting;
-using UnityEditor.SearchService;
-using UnityEngine;
-using UnityEngine.EventSystems;
+/* 
+ * File: GameManager.cs
+ * Project: Project Dungeon
+ * Author: Justin Salanga
+ * Date: 02/05/2025 
+ */
 
+using UnityEngine;
+
+/// <summary>
+/// Manages the overall game state and player interactions between different game components.
+/// </summary>
 public class GameManager : MonoBehaviour
 {
+    /// <summary>
+    /// Singleton instance of GameManager
+    /// </summary>
     public static GameManager Instance { get; private set; }
+    /// <summary>
+    /// Enumeration of possible game states.
+    /// </summary>
     public enum GameState
     {
         None, Dragging, Pinching, Select, SelectHold, MovingObject
@@ -47,6 +59,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton logic
         if (Instance != null)
         {
             Destroy(gameObject);
@@ -57,6 +70,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Connect PlayerController to game logic
         playerController = GetComponent<PlayerController>();
         playerController.OnDragStart += StartDragging;
         playerController.OnDragEnd += EndDragging;
@@ -67,9 +81,14 @@ public class GameManager : MonoBehaviour
         farmUI = mainCanvas.GetComponent<FarmUI>();
     }
 
+    /// <summary>
+    /// The initial setup for dragging.
+    /// NOTE: Placing Drag logic in Update starts pinching in the next frame. Needed for PlayerController.IsInteractingWithUI() to work.
+    /// </summary>
     private void StartDragging()
     {
-        if (movingSelectable != null && HitInteractable(out ISelectable selectable) && selectable == movingSelectable)
+        // Attempt to drag unless we're moving an object.
+        if (movingSelectable != null && HitSelectable(out ISelectable selectable) && selectable == movingSelectable)
         {
             currentGameState = GameState.MovingObject;
         } else
@@ -78,6 +97,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ends the dragging process.
+    /// </summary>
     private void EndDragging()
     {
         isDragging = false;
@@ -85,78 +107,113 @@ public class GameManager : MonoBehaviour
         if (currentGameState == GameState.Dragging || currentGameState == GameState.MovingObject) ResetGameState();
     }
 
+    /// <summary>
+    /// Attempt to pinch.
+    /// NOTE: Placing Pinch logic in Update starts pinching in the next frame. Needed for PlayerController.IsInteractingWithUI() to work.
+    /// </summary>
     private void StartPinching()
     {
         tryPinching = true;
     }
 
+    /// <summary>
+    /// Ends the pinching process.
+    /// </summary>
     private void EndPinching()
     {
         ResetGameState();
     }
 
+    /// <summary>
+    /// Initiate the moving object process.
+    /// </summary>
+    /// <param name="newMovingSelectable">The selectable object to move.</param>
     public void StartMoving(ISelectable newMovingSelectable)
     {
         movingSelectable = newMovingSelectable;
     }
 
+    /// <summary>
+    /// Ends the moving object process.
+    /// </summary>
     public void EndMoving()
     {
         movingSelectable = null;
         ResetGameState();
     }
 
+    /// <summary>
+    /// This function is called when tapping on a selectable object, as long as no other object is already
+    /// selected or the player is interacting with UI.
+    /// </summary>
     private void Select()
     {
         if (playerController.IsInteractingWithUI()) return;
         if (currentGameState == GameState.Select) return;
-        if (movingSelectable == null && HitInteractable(out ISelectable selectable))
+        if (movingSelectable == null && HitSelectable(out ISelectable selectable))
         {
+            // Remove existing Select Hold menu if exists
             EndSelectHold();
+
+            // Set as selected object and perform Select function
             currentSelectable = selectable;
             currentSelectableSO = currentSelectable.Select();
-            farmUI.SetUIObjectActive(true, FarmUI.UIObject.SelectUI, currentSelectableSO);
+
+            // Setup UI
+            farmUI.SetUIObjectActive(true, FarmUI.UISegment.SelectUI, currentSelectableSO);
             currentGameState = GameState.Select;
-            Debug.Log("J$ PlayerController Select");
         }
     }
 
+    /// <summary>
+    /// End the select process.
+    /// </summary>
     public void EndSelect()
     {
-        farmUI.SetUIObjectActive(false, FarmUI.UIObject.SelectUI, currentSelectableSO);
+        // Remove UI and reset select state
+        farmUI.SetUIObjectActive(false, FarmUI.UISegment.SelectUI, currentSelectableSO);
         currentGameState = GameState.None;
         currentSelectable.EndSelect();
         currentSelectable = null;
         currentSelectableSO = null;
     }
 
+    /// <summary>
+    /// This function is called when tap-holding on a selectable object, as long as no other object is already
+    /// selected, the player is interacting with UI, or the player is dragging on the screen.
+    /// </summary>
     private void SelectHold()
     {
         if (playerController.IsInteractingWithUI()) return;
         if (currentGameState == GameState.Select) return;
         if (isDragging) return;
-        if (movingSelectable == null && HitInteractable(out ISelectable selectable))
+        if (movingSelectable == null && HitSelectable(out ISelectable selectable))
         {
+            // Remove existing Select Hold menu if exists
             EndSelectHold();
             currentSelectable = selectable;
             currentSelectable.SelectHold();
             currentGameState = GameState.SelectHold;
-            Debug.Log("J$ PlayerController Select Hold");
             EndDragging();
         }
     }
 
+    /// <summary>
+    /// Ends the select hold process.
+    /// </summary>
     private void EndSelectHold()
     {
         if (currentSelectable != null)
         {
-            Debug.Log("J$ GameManager EndSelect from GM");
             currentSelectable.EndSelectHold();
             currentSelectable = null;
             currentGameState = GameState.None;
         }
     }
 
+    /// <summary>
+    /// Resets the current game state.
+    /// </summary>
     private void ResetGameState()
     {
         currentGameState = GameState.None;
@@ -164,6 +221,8 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        // This method allows calculation of pinching to be deferred to the next frame, allowing 
+        //    PlayerController.IsInteractingWithUI() to work correctly.
         if (tryPinching) {
             if (!playerController.IsInteractingWithUI())
             {
@@ -180,67 +239,71 @@ public class GameManager : MonoBehaviour
 
         if (currentGameState == GameState.None)
         {
+            // This method allows calculation of dragging to be deferred to the next frame, allowing 
+            //    PlayerController.IsInteractingWithUI() to work correctly.
             if (tryDragging && !playerController.IsInteractingWithUI())
             {
                 EndSelectHold();
                 startDragPosition = playerController.GetTouchPosition();
                 cameraManager.StartDrag();
                 currentGameState = GameState.Dragging;
-                //StartCoroutine(DetectDrag());
             }
             tryDragging = false;
         }
-        if (currentGameState == GameState.Dragging) 
+        else if (currentGameState == GameState.Dragging) 
         {
             MoveCamera();
         }
-        if (currentGameState == GameState.MovingObject)
+        else if (currentGameState == GameState.MovingObject)
         {
             MoveObject();
         }
-        if (currentGameState == GameState.Pinching)
+        else if (currentGameState == GameState.Pinching)
         {
             ZoomCamera();
         }
     }
 
+    /// <summary>
+    /// Move the selectable object to follow the cursor.
+    /// </summary>
     private void MoveObject()
     {
         Vector2 currentPosition = playerController.GetTouchPosition();
+        // Use a raycast from the camera to the floor to find the best place to move to
         Ray ray = cameraManager.GetRayFromScreen(currentPosition);
         if (Physics.Raycast(ray, out RaycastHit hitInfo, 200f, floorLayer))
         {
             movingSelectable.Move(hitInfo.point, newDragOffset);
             newDragOffset = false;
         }
+        // Pan the camera if the object is moved to the edge of the screen
         cameraManager.CheckPanCamera(currentPosition);
     }
 
+    /// <summary>
+    /// Get the main canvas from the scene.
+    /// </summary>
+    /// <returns>The main canvas of the scene.</returns>
     public Canvas GetMainCanvas()
     {
         return mainCanvas;
     }
 
-    private IEnumerator DetectDrag()
-    {
-        Vector2 moveVector = Vector2.zero;
-        
-        while (moveVector.magnitude < minDragDistance)
-        {
-            moveVector = startDragPosition - playerController.GetTouchPosition();
-            yield return null;
-        }
-        currentGameState = GameState.Dragging;
-    }
-
+    /// <summary>
+    /// Moves the camera based on the drag distance.
+    /// </summary>
     private void MoveCamera()
     {
         Vector2 moveVector = startDragPosition - playerController.GetTouchPosition();
         if (moveVector.magnitude > minDragDistance) isDragging = true;
-        moveVector.y *= 1.2f; //TODO: currently hard coding the equalizing, calculate based on canvas size.
+        moveVector.y *= 1.2f; //NOTE: Currently hard coding the equalizing, calculate based on canvas size.
         cameraManager.DragCamera(moveVector);
     }
 
+    /// <summary>
+    /// Zooms the camera based on the pinch distance.
+    /// </summary>
     private void ZoomCamera()
     {
         float pinchDelta = startPinchDistance - playerController.GetPinchDistance();
@@ -248,12 +311,19 @@ public class GameManager : MonoBehaviour
         cameraManager.ZoomCamera(calculatedZoom);
     }
 
-    private bool HitInteractable(out ISelectable selectable)
+
+    /// <summary>
+    /// Detects if tap location lands on top of a Selectable.
+    /// </summary>
+    /// <param name="selectable">Output of selectable if hit</param>
+    /// <returns>True if a selectable object was tapped on; otherwise, false.</returns>
+    private bool HitSelectable(out ISelectable selectable)
     {
         Ray ray = cameraManager.GetRayFromScreen(playerController.GetTouchPosition());
         selectable = null;
         if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
+            // Check if object hit contains an ISelectable component.
             MonoBehaviour[] components = hitInfo.collider.gameObject.GetComponents<MonoBehaviour>();
             foreach (var component in components)
             {
@@ -267,6 +337,10 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Get the inventory component.
+    /// </summary>
+    /// <returns>The inventory component.</returns>
     public Inventory GetInventory()
     {
         return inventory;
