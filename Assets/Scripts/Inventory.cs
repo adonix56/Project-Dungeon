@@ -89,6 +89,36 @@ public class Inventory : MonoBehaviour
     }
 
     /// <summary>
+    /// Adds an item to inventory.
+    /// </summary>
+    /// <param name="inventoryItemSO">InventoryItemSO of the item to add.</param>
+    /// <param name="inventoryItem">InventoryItemDetails of the item to add.</param>
+    public void AddItem(InventoryItemSO inventoryItemSO, InventoryItem inventoryItem)
+    {
+        if (inventoryItems.ContainsKey(inventoryItemSO))
+        {
+            List<InventoryItem> itemList = inventoryItems[inventoryItemSO];
+            int index = 0;
+            if (inventoryItemSO.HasQuality())
+            {
+                index = itemList.FindIndex(item => item.quality == inventoryItem.quality);
+            }
+            // Inventory has item, but not matching quality.
+            if (index < 0)
+            {
+                itemList.Add(inventoryItem);
+                return;
+            }
+            // Inventory has the item, increase the quantity.
+            int newQuantity = inventoryItem.quantity + itemList[index].quantity;
+            itemList[index] = new InventoryItem(inventoryItem.quality, newQuantity);
+        } else
+        {
+            inventoryItems.Add(inventoryItemSO, new List<InventoryItem> { inventoryItem });
+        }
+    }
+
+    /// <summary>
     /// Attempts to use the specified inventory item.
     /// </summary>
     /// <param name="useItem">The InventoryItemSO to attempt to use.</param>

@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// Controls the state of Garden Soil Farm objects.
@@ -18,6 +19,7 @@ public class GardenSoil : BasePlacement
     [SerializeField] private List<GardenSoilItem> items;
     [SerializeField] private GameObject itemPrefab;
     [SerializeField] private GameObject itemEmptyPrefab;
+    [SerializeField] private GameObject harvestResultPrefab;
     private Action<InventoryItemSO> currentFilterAction;
 
     protected override void Start()
@@ -62,10 +64,18 @@ public class GardenSoil : BasePlacement
         int currentSiblingIndex = clickedItem.transform.GetSiblingIndex();
         if (items[currentSiblingIndex].CanBeHarvested())
         {
+            GardenSoilItem harvestItem = items[currentSiblingIndex];
             // Harvest FarmItem from Active to Empty
-            items[currentSiblingIndex].Harvest(ReplaceFarmItem(currentSiblingIndex, false));
-            // TODO: Add item to inventory
-            Debug.Log("J$ GardenSoil Harvest");
+            harvestItem.Harvest(ReplaceFarmItem(currentSiblingIndex, false));
+            // Check if crit
+            int quantity = 3;
+            if (GameManager.Instance.CheckGardenCrit()) quantity *= 2;
+            // Check quality
+            int quality = Random.Range(0, 101);
+            GameManager.Instance.GetInventory().AddItem(harvestItem.seedItemSO.connectedInventoryItem, new InventoryItem(quality, quantity));
+            HarvestResult harvestResult = farmUI.AddItemToFarmUI(harvestResultPrefab).GetComponent<HarvestResult>();
+            harvestResult.SetupResult(harvestItem.seedItemSO.connectedInventoryItem, quality, quantity == 6);
+            Debug.Log($"J$ GardenSoil Harvested {quantity} {harvestItem.seedItemSO.connectedInventoryItem.itemName}s of Quality {quality}.");
         } else
         {
             Debug.Log("J$ GardenSoil Cannot be harvested");

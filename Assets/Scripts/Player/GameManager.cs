@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CameraManager cameraManager;
     private GameState currentGameState = GameState.None;
 
+    [Header("Farm Stats")]
+    [SerializeField] private int gardenCritChance = 10;
+
     [Header("Dragging")]
     [SerializeField] private float minDragDistance;
     [SerializeField] private float cameraMoveSpeed;
@@ -335,6 +338,15 @@ public class GameManager : MonoBehaviour
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// Performs a crit check for Garden Soil Harvesting.
+    /// </summary>
+    /// <returns>True if a crit was successful; otherwise, false</returns>
+    public bool CheckGardenCrit()
+    {
+        return Random.Range(0, 99) < gardenCritChance;
     }
 
     /// <summary>

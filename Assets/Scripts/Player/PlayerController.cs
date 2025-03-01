@@ -46,6 +46,7 @@ public class PlayerController : MonoBehaviour
 
     private InputControls inputControls;
     private TouchID primaryTouch;
+    private bool isOverUI = false;
 
     private enum TouchID { 
         None, Drag, Pinch
@@ -78,6 +79,11 @@ public class PlayerController : MonoBehaviour
 
         inputControls.PlayerFarm.Select.performed += _ => Select();
         inputControls.PlayerFarm.SelectHold.performed += _ => SelectHold();
+    }
+
+    private void Update()
+    {
+        isOverUI = EventSystem.current.IsPointerOverGameObject();
     }
 
     /// <summary>
@@ -172,6 +178,6 @@ public class PlayerController : MonoBehaviour
     /// <returns>True if the player is interacting with the UI; otherwise, false.</returns>
     public bool IsInteractingWithUI()
     {
-        return EventSystem.current.IsPointerOverGameObject();
+        return isOverUI;
     }
 }

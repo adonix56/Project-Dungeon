@@ -117,6 +117,18 @@ public class FarmUI : MonoBehaviour
     }
 
     /// <summary>
+    /// Adds a UI Element to the Farm UI
+    /// </summary>
+    /// <param name="itemObject">Prefab to instantiate.</param>
+    /// <returns>A reference to the newly instantiated GameObject.</returns>
+    public GameObject AddItemToFarmUI(GameObject itemObject)
+    {
+        GameObject newObject = Instantiate(itemObject);
+        newObject.transform.SetParent(transform, false);
+        return newObject;
+    }
+
+    /// <summary>
     /// Clears the SelectUI container of FarmItemUI objects.
     /// </summary>
     public void EmptySelectContainer()

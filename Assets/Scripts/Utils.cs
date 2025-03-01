@@ -25,6 +25,17 @@ public struct InventoryItem
     /// The quantity of the inventory item.
     /// </summary>
     public int quantity;
+
+    /// <summary>
+    /// Constructor to create a new Inventory Item entry.
+    /// </summary>
+    /// <param name="quality">Quality of the item.</param>
+    /// <param name="quantity">Quantity of the item.</param>
+    public InventoryItem (int quality, int quantity)
+    {
+        this.quality = quality;
+        this.quantity = quantity;
+    }
 }
 
 /// <summary>
