@@ -17,7 +17,7 @@ public class FarmUI : MonoBehaviour
     private const string DEACTIVATE = "Deactivate";
 
     [Header("MainUI")]
-    [SerializeField] private GameObject mainUI;
+    [SerializeField] private MainUI mainUI;
     [SerializeField] private TextMeshProUGUI goldText;
 
     [Header("SelectUI")]
@@ -30,6 +30,9 @@ public class FarmUI : MonoBehaviour
 
     [Header("FilterUI")]
     [SerializeField] private FilterItemsUI filterUI;
+
+    [Header("ShopUI")]
+    [SerializeField] private ShopUI shopUI;
     /// <summary>
     /// Event triggered when a filtered item is selected.
     /// </summary>
@@ -39,7 +42,7 @@ public class FarmUI : MonoBehaviour
     /// Enumeration of different UI Segments
     /// </summary>
     public enum UISegment {
-        None, MainUI, SelectUI, InventoryUI, FilterUI
+        None, MainUI, SelectUI, InventoryUI, FilterUI, ShopUI
     }
 
     /// <summary>
@@ -56,12 +59,12 @@ public class FarmUI : MonoBehaviour
             {
                 selectTitle.text = obj.title;
                 selectUI.gameObject.SetActive(true);
-                mainUI.SetActive(false);
+                mainUI.gameObject.SetActive(false);
             }
             if (!active)
             {
                 selectUI.SetTrigger(DEACTIVATE);
-                mainUI.SetActive(true);
+                mainUI.gameObject.SetActive(true);
             }
         } else if (uiSegment == UISegment.InventoryUI)
         {
@@ -71,7 +74,12 @@ public class FarmUI : MonoBehaviour
             if (!active) filterUI.OnSelectedItem -= FilterUI_OnSelectedItem;
             filterUI.gameObject.SetActive(active);
             if (active) filterUI.OnSelectedItem += FilterUI_OnSelectedItem;
+        } else if (uiSegment == UISegment.ShopUI)
+        {
+            mainUI.gameObject.SetActive(!active);
+            shopUI.gameObject.SetActive(active);
         }
+
     }
 
     /// <summary>

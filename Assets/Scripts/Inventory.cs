@@ -16,6 +16,10 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
     /// <summary>
+    /// Event triggered when gold amount changed.
+    /// </summary>
+    public event Action<int> OnGoldChange;
+    /// <summary>
     /// The initial inventory items and their quantities.
     /// </summary>
     [SerializeField]
@@ -25,6 +29,9 @@ public class Inventory : MonoBehaviour
     /// A dictionary that holds the inventory items and their details.
     /// </summary>
     private Dictionary<InventoryItemSO, List<InventoryItem>> inventoryItems;
+
+    [SerializeField]
+    private InventoryItemSO goldSO;
 
     private void Awake()
     {
@@ -153,7 +160,7 @@ public class Inventory : MonoBehaviour
             Debug.LogError($"J$ Inventory Trying to use {useItem.itemName}, but player does not own any.");
             return false;
         }
-        item.quantity--;
+        item.quantity -= useQuantity;
         if (item.quantity <= 0)
         {
             if (itemList.Count == 1)
@@ -166,6 +173,31 @@ public class Inventory : MonoBehaviour
         }
         itemList[index] = item;
         return true;
+    }
+
+    /// <summary>
+    /// Retrieves the current gold amount.
+    /// </summary>
+    /// <returns>The current gold amount.</returns>
+    public int GetGold()
+    {
+        return inventoryItems[goldSO][0].quantity;
+    }
+
+    /// <summary>
+    /// Changes the gold amount by the amount given.
+    /// </summary>
+    /// <param name="amount">The amount of gold to add or remove.</param>
+    public void ChangeGold(int amount)
+    {
+        if (amount > 0)
+        {
+            AddItem(goldSO, new InventoryItem(0, amount));
+        } else
+        {
+            TryUseItem(goldSO, amount * -1);
+        }
+        OnGoldChange?.Invoke(GetGold());
     }
 
     public void TESTING()

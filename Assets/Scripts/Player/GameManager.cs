@@ -5,7 +5,9 @@
  * Date: 02/05/2025 
  */
 
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// Manages the overall game state and player interactions between different game components.
@@ -21,10 +23,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public enum GameState
     {
-        None, Dragging, Pinching, Select, SelectHold, MovingObject
+        None, Dragging, Pinching, Select, SelectHold, MovingObject, Shop
     }
 
-    private PlayerController playerController;
+    public PlayerController playerController;
     [SerializeField] private CameraManager cameraManager;
     private GameState currentGameState = GameState.None;
 
@@ -153,6 +155,17 @@ public class GameManager : MonoBehaviour
     {
         if (playerController.IsInteractingWithUI()) return;
         if (currentGameState == GameState.Select) return;
+
+        if (HitShop(out Shop shop))
+        {
+            //Remove existing Select Hold menu if exists
+            EndSelectHold();
+
+            //Setup UI
+            farmUI.SetUIObjectActive(true, FarmUI.UISegment.ShopUI);
+            currentGameState = GameState.Shop;
+        }
+
         if (movingSelectable == null && HitSelectable(out ISelectable selectable))
         {
             // Remove existing Select Hold menu if exists
@@ -217,7 +230,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Resets the current game state.
     /// </summary>
-    private void ResetGameState()
+    public void ResetGameState()
     {
         currentGameState = GameState.None;
     }
@@ -337,6 +350,20 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        return false;
+    }
+
+    /// <summary>
+    /// Detects if tap location lands on top of a Selectable.
+    /// </summary>
+    /// <param name="shop">Output of shop if hit</param>
+    /// <returns>True if a Shop object was tapped on; otherwise, false.</returns>
+    private bool HitShop(out Shop shop)
+    {
+        Ray ray = cameraManager.GetRayFromScreen(playerController.GetTouchPosition());
+        shop = null;
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            return hitInfo.collider.gameObject.TryGetComponent<Shop>(out shop);
         return false;
     }
 
