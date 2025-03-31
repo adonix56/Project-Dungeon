@@ -102,7 +102,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     /// <summary>
     /// Executed when select process is ended.
     /// </summary>
-    public void EndSelect()
+    public virtual void EndSelect()
     {
         cameraManager.ZoomOut();
     }

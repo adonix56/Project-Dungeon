@@ -20,6 +20,7 @@ public class GardenSoil : BasePlacement
     [SerializeField] private GameObject itemPrefab;
     [SerializeField] private GameObject itemEmptyPrefab;
     [SerializeField] private GameObject harvestResultPrefab;
+
     private Action<InventoryItemSO> currentFilterAction;
 
     protected override void Start()
@@ -55,6 +56,12 @@ public class GardenSoil : BasePlacement
         return ret;
     }
 
+    public override void EndSelect()
+    {
+        base.EndSelect();
+        
+    }
+
     /// <summary>
     /// Subscriber for FarmItem OnClick Events that have seeds already planted.
     /// </summary>
@@ -72,7 +79,7 @@ public class GardenSoil : BasePlacement
             if (GameManager.Instance.CheckGardenCrit()) quantity *= 2;
             // Check quality
             int quality = Random.Range(0, 101);
-            GameManager.Instance.GetInventory().AddItem(harvestItem.seedItemSO.connectedInventoryItem, new InventoryItem(quality, quantity));
+            GameManager.Instance.GetInventory().AddItem(new InventoryItem(harvestItem.seedItemSO.connectedInventoryItem, quality, quantity));
             HarvestResult harvestResult = farmUI.AddItemToFarmUI(harvestResultPrefab).GetComponent<HarvestResult>();
             harvestResult.SetupResult(harvestItem.seedItemSO.connectedInventoryItem, quality, quantity == 6);
             Debug.Log($"J$ GardenSoil Harvested {quantity} {harvestItem.seedItemSO.connectedInventoryItem.itemName}s of Quality {quality}.");
@@ -105,13 +112,16 @@ public class GardenSoil : BasePlacement
         farmUI.OnFilterSelected -= currentFilterAction;
         currentFilterAction = null;
 
-        // Replace FarmItem from Empty to Active
-        int currentSiblingIndex = clickedItem.transform.GetSiblingIndex();
-        items[currentSiblingIndex].farmItem = ReplaceFarmItem(currentSiblingIndex, true);
+        if (obj != null)
+        {
+            // Replace FarmItem from Empty to Active
+            int currentSiblingIndex = clickedItem.transform.GetSiblingIndex();
+            items[currentSiblingIndex].farmItem = ReplaceFarmItem(currentSiblingIndex, true);
 
-        // Plant Seeds
-        items[currentSiblingIndex].PlantSeeds(obj);
-        items[currentSiblingIndex].farmItem.PlantSeeds(items[currentSiblingIndex]);
+            // Plant Seeds
+            items[currentSiblingIndex].PlantSeeds(obj);
+            items[currentSiblingIndex].farmItem.PlantSeeds(items[currentSiblingIndex]);
+        }
     }
 
     /// <summary>

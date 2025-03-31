@@ -25,9 +25,10 @@ public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
     /// </summary>
     [SerializeField] private Transform itemContainer;
     /// <summary>
-    /// A List<> representation of the filtered items.
+    /// A List<> representation of the filtered slots.
     /// </summary>
-    [SerializeField] private List<InventoryItemSO> filteredItems;
+    [SerializeField] private List<InventoryItemUI> itemSlots = new List<InventoryItemUI>();
+    private int filteredItems;
     private FarmUI farmUI;
 
     private void Start()
@@ -53,24 +54,6 @@ public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
     }
 
     /// <summary>
-    /// Event Handler when clicking on a filtered item.
-    /// </summary>
-    /// <param name="index">The index of the clicked item in the filtered list</param>
-    public void OnItemClicked(int index)
-    {
-        if (index < filteredItems.Count) {
-            // Deduct from Inventory
-            Inventory inventory = GameManager.Instance.GetInventory();
-            if (!inventory.TryUseItem(filteredItems[index])) {
-                Debug.LogError($"J$ FilterItemsUI Failed to use {filteredItems[index].itemName}");
-            }
-            // Replace Empty UI prefab with farm UI prefab
-            OnSelectedItem?.Invoke(filteredItems[index]);
-            ExitFilter();
-        }
-    }
-
-    /// <summary>
     /// Populate the empty slots with filtered items, or clear them.
     /// </summary>
     /// <param name="category">The category of items to filter.</param>
@@ -87,18 +70,37 @@ public class FilterItemsUI : MonoBehaviour, IPointerClickHandler
             // Populate each UI slot with filtered items
             for (int i = 0; i < itemCount; i++)
             {
-                Transform child = itemContainer.GetChild(i);
-                filteredItems.Add(items.Get(i).Item1);
-                Utils.FillItem(child, items.Get(i));
+                itemSlots[i].Populate(items.Get(i), false, false);
+                itemSlots[i].OnItemSelect += OnItemClicked;
+                filteredItems++;
             }
         } else
         {
             // Reset each of the populated UI slots
-            for (int i = 0; i < filteredItems.Count; i++)
+            for (int i = 0; i < filteredItems; i++)
             {
-                Utils.EmptyItem(itemContainer.GetChild(i));
+                Debug.Log("J$ FilterItemsUI Emptying slots");
+                itemSlots[i].Empty();
+                itemSlots[i].OnItemSelect -= OnItemClicked;
             }
-            filteredItems.Clear();
+            filteredItems = 0;
         }
+    }
+
+    /// <summary>
+    /// Event Handler when clicking on a filtered item.
+    /// </summary>
+    /// <param name="item">The InventoryItem of the clicked filtered slot.</param>
+    private void OnItemClicked(InventoryItem item)
+    {
+        // Deduct from Inventory
+        Inventory inventory = GameManager.Instance.GetInventory();
+        if (!inventory.TryUseItem(item.inventoryItemSO, 1))
+        {
+            Debug.LogError($"J$ FilterItemsUI Failed to use {item.inventoryItemSO.itemName}");
+        }
+        // Replace Empty UI prefab with farm UI prefab
+        OnSelectedItem?.Invoke(item.inventoryItemSO);
+        ExitFilter();
     }
 }

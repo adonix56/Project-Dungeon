@@ -37,7 +37,7 @@ public class InventoryUI : MonoBehaviour
             for (int i = 0; i < inventoryItems.Count; i++)
             {
                 Transform child = itemContainer.GetChild(i);
-                Utils.FillItem(child, inventoryItems.Get(i));
+                //Utils.FillItem(child, inventoryItems.Get(i));
             }
         } else
         {

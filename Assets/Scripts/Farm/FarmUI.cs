@@ -71,7 +71,11 @@ public class FarmUI : MonoBehaviour
             inventoryUI.gameObject.SetActive(active);
         } else if (uiSegment == UISegment.FilterUI)
         {
-            if (!active) filterUI.OnSelectedItem -= FilterUI_OnSelectedItem;
+            if (!active)
+            {
+                filterUI.OnSelectedItem -= FilterUI_OnSelectedItem; 
+                OnFilterSelected?.Invoke(null);
+            }
             filterUI.gameObject.SetActive(active);
             if (active) filterUI.OnSelectedItem += FilterUI_OnSelectedItem;
         } else if (uiSegment == UISegment.ShopUI)

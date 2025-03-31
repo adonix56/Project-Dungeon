@@ -7,7 +7,7 @@ public class DescriptionPopup : MonoBehaviour
 {
     private const string HIDE = "Hide";
 
-    public event Action<InventoryItemSO, int> OnSellClick;
+    public event Action<InventoryItem> OnSellClick;
 
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI title;
@@ -16,30 +16,34 @@ public class DescriptionPopup : MonoBehaviour
     [SerializeField] private TextMeshProUGUI description;
     [SerializeField] private TextMeshProUGUI sellPrice;
     [SerializeField] private GameObject sellButton;
-
-    private Animator animator;
-    private InventoryItemSO inventoryItemSO;
+    [SerializeField] private Animator animator;
+    [SerializeField] private RectTransform bodyRectTransform;
+    private InventoryItem inventoryItem;
     private int quality;
     private PlayerController playerController;
 
     private void Start()
     {
-        animator = GetComponent<Animator>();
         playerController = GameManager.Instance.playerController;
         playerController.OnSelectPerformed += PlayerController_OnSelectPerformed;
     }
 
     private void PlayerController_OnSelectPerformed()
     {
-        if (!RectTransformUtility.RectangleContainsScreenPoint(GetComponent<RectTransform>(), playerController.GetTouchPosition()))
+        if (!RectTransformUtility.RectangleContainsScreenPoint(bodyRectTransform, playerController.GetTouchPosition()))
         {
-            animator.SetTrigger(HIDE);
+            Hide();
+        }
+        if (sellButton.activeSelf && RectTransformUtility.RectangleContainsScreenPoint(sellButton.transform.GetChild(0).GetComponent<RectTransform>(), playerController.GetTouchPosition()))
+        {
+            Sell();
         }
     }
 
-    public void Setup(InventoryItemSO inventoryItemSO, InventoryItem inventoryItem, bool includeSellButton = false)
+    public void Setup(InventoryItem inventoryItem, bool includeSellButton = false)
     {
-        this.inventoryItemSO = inventoryItemSO;
+        this.inventoryItem = inventoryItem;
+        InventoryItemSO inventoryItemSO = inventoryItem.inventoryItemSO;
         quality = inventoryItem.quality;
         icon.sprite = inventoryItemSO.sprite;
         title.text = inventoryItemSO.itemName;
@@ -54,11 +58,14 @@ public class DescriptionPopup : MonoBehaviour
 
     public void Sell()
     {
-        OnSellClick?.Invoke(inventoryItemSO, quality);
+        OnSellClick?.Invoke(inventoryItem); 
+        playerController.OnSelectPerformed -= PlayerController_OnSelectPerformed;
+        Destroy(gameObject);
     }
 
     public void Hide()
     {
+        playerController.OnSelectPerformed -= PlayerController_OnSelectPerformed;
         animator.SetTrigger(HIDE);
     }
 

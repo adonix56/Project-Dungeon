@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Android;
 
 /// <summary>
 /// Manages the state of the player's inventory, including adding, filtering and using items.
@@ -74,7 +75,7 @@ public class Inventory : MonoBehaviour
     /// <returns>A wrapper containing all inventory items.</returns>
     public ItemsWrapper GetAllInventoryItems() 
     {
-        return ForeachInventoryItem((items, itemSO, item) => items.items.Add(new Tuple<InventoryItemSO, InventoryItem>(itemSO, item)));
+        return ForeachInventoryItem((items, itemSO, item) => items.items.Add(item));
     }
 
     /// <summary>
@@ -88,7 +89,7 @@ public class Inventory : MonoBehaviour
         {
             if (itemSO.category == category)
             {
-                items.items.Add(new Tuple<InventoryItemSO, InventoryItem>(itemSO, item));
+                items.items.Add(item);
             }
         };
 
@@ -98,15 +99,14 @@ public class Inventory : MonoBehaviour
     /// <summary>
     /// Adds an item to inventory.
     /// </summary>
-    /// <param name="inventoryItemSO">InventoryItemSO of the item to add.</param>
     /// <param name="inventoryItem">InventoryItemDetails of the item to add.</param>
-    public void AddItem(InventoryItemSO inventoryItemSO, InventoryItem inventoryItem)
+    public void AddItem(InventoryItem inventoryItem)
     {
-        if (inventoryItems.ContainsKey(inventoryItemSO))
+        if (inventoryItems.ContainsKey(inventoryItem.inventoryItemSO))
         {
-            List<InventoryItem> itemList = inventoryItems[inventoryItemSO];
+            List<InventoryItem> itemList = inventoryItems[inventoryItem.inventoryItemSO];
             int index = 0;
-            if (inventoryItemSO.HasQuality())
+            if (inventoryItem.inventoryItemSO.HasQuality())
             {
                 index = itemList.FindIndex(item => item.quality == inventoryItem.quality);
             }
@@ -118,10 +118,10 @@ public class Inventory : MonoBehaviour
             }
             // Inventory has the item, increase the quantity.
             int newQuantity = inventoryItem.quantity + itemList[index].quantity;
-            itemList[index] = new InventoryItem(inventoryItem.quality, newQuantity);
+            itemList[index] = new InventoryItem(inventoryItem.inventoryItemSO, inventoryItem.quality, newQuantity);
         } else
         {
-            inventoryItems.Add(inventoryItemSO, new List<InventoryItem> { inventoryItem });
+            inventoryItems.Add(inventoryItem.inventoryItemSO, new List<InventoryItem> { inventoryItem });
         }
     }
 
@@ -134,6 +134,11 @@ public class Inventory : MonoBehaviour
     /// <returns>True if the item was successfully used; otherwise, false.</returns>
     public bool TryUseItem(InventoryItemSO useItem, int useQuantity = 1, int quality = 0)
     {
+        if (!inventoryItems.ContainsKey(useItem))
+        {
+            Debug.LogError($"J$ Inventory Trying to use {useItem.itemName}, but player does not own any.");
+            return false;
+        }
         List<InventoryItem> itemList = inventoryItems[useItem];
         int index = 0;
         InventoryItem item = itemList[index];
@@ -141,37 +146,45 @@ public class Inventory : MonoBehaviour
         if (useItem.HasQuality())
         {
             bool found = false;
-            for (int i = 1; i < itemList.Count; i++) { 
-                if (itemList[i].quality == quality)
+            for (index = 0; index < itemList.Count; index++) { 
+                if (itemList[index].quality == quality)
                 {
                     found = true;
-                    item = itemList[i];
+                    item = itemList[index];
                     break;
                 }
             }
             if (!found)
             {
-                Debug.Log($"J$ Inventory Trying to use {useItem.itemName} with a quality of {quality}, but the player does not own any.");
+                Debug.LogError($"J$ Inventory Trying to use {useItem.itemName} with a quality of {quality}, but the player does not own any.");
                 return false;
             }
         }
-        if (item.quantity <= 0)
+        if (useQuantity > item.quantity)
         {
-            Debug.LogError($"J$ Inventory Trying to use {useItem.itemName}, but player does not own any.");
-            return false;
+            Debug.LogWarning($"J$ Inventory Trying to use {useQuantity} {useItem.itemName}, but player does not have enough. Consuming only {item.quantity}.");
         }
-        item.quantity -= useQuantity;
-        if (item.quantity <= 0)
+        bool removed = false;
+        while (useQuantity > 0 && item.quantity > 0)
         {
-            if (itemList.Count == 1)
+            item.quantity--;
+            if (item.quantity <= 0)
             {
-                inventoryItems.Remove(useItem);
-            } else
-            {
-                itemList.RemoveAt(index);
+                if (itemList.Count == 1)
+                {
+                    inventoryItems.Remove(useItem);
+                } else
+                {
+                    itemList.RemoveAt(index);
+                }
+                removed = true;
             }
+            // TODO: Perform Item Task
+
+
+            useQuantity--;
         }
-        itemList[index] = item;
+        if (!removed) itemList[index] = item;
         return true;
     }
 
@@ -192,7 +205,7 @@ public class Inventory : MonoBehaviour
     {
         if (amount > 0)
         {
-            AddItem(goldSO, new InventoryItem(0, amount));
+            AddItem(new InventoryItem(goldSO, 0, amount));
         } else
         {
             TryUseItem(goldSO, amount * -1);

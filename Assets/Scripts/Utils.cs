@@ -18,6 +18,10 @@ using UnityEngine.UI;
 public struct InventoryItem
 {
     /// <summary>
+    /// The InventoryItemSO pertaining to the current item.
+    /// </summary>
+    public InventoryItemSO inventoryItemSO;
+    /// <summary>
     /// The quality of the inventory item.
     /// </summary>
     public int quality;
@@ -31,10 +35,19 @@ public struct InventoryItem
     /// </summary>
     /// <param name="quality">Quality of the item.</param>
     /// <param name="quantity">Quantity of the item.</param>
-    public InventoryItem (int quality, int quantity)
+    public InventoryItem (InventoryItemSO inventoryItemSO = null, int quality = 0, int quantity = 0)
     {
+        this.inventoryItemSO = inventoryItemSO;
         this.quality = quality;
         this.quantity = quantity;
+    }
+
+    /// <summary>
+    /// Checks if there is no connected InventoryItemSO;
+    /// </summary>
+    /// <returns>True if there is no InventoryItemSO; otherwise, false.</returns>
+    public bool IsNull() { 
+        return this.inventoryItemSO == null;
     }
 }
 
@@ -81,9 +94,9 @@ public class InventoryDictionaryWrapper
 public class ItemsWrapper
 {
     /// <summary>
-    /// The list of tuples representing each InventoryItemSO and a list of instances of said SO.
+    /// The list of InventoryItems.
     /// </summary>
-    public List<Tuple<InventoryItemSO, InventoryItem>> items = new List<Tuple<InventoryItemSO, InventoryItem>>();
+    public List<InventoryItem> items = new List<InventoryItem>();
     /// <summary>
     /// Gets the number of items.
     /// </summary>
@@ -92,14 +105,13 @@ public class ItemsWrapper
     /// Gets an item at a specified index.
     /// </summary>
     /// <param name="index">The index of the item to retrieve.</param>
-    /// <returns>The inventory item tuple at the specified index.</returns>
-    public Tuple<InventoryItemSO, InventoryItem> Get(int index) {  return items[index]; }
+    /// <returns>The inventory item at the specified index.</returns>
+    public InventoryItem Get(int index) {  return items[index]; }
     /// <summary>
-    /// Creates and Adds a inventory item Tuple to the list.
+    /// Creates and Adds a inventory item to the list.
     /// </summary>
-    /// <param name="itemSO">The InventoryItemSO to add.</param>
     /// <param name="item">The item details to add.</param>
-    public void Add(InventoryItemSO itemSO, InventoryItem item) { items.Add(new Tuple<InventoryItemSO, InventoryItem>(itemSO, item)); }
+    public void Add(InventoryItem item) { items.Add(item); }
     /// <summary>
     /// Clears the entire inventory List.
     /// </summary>

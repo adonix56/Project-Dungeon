@@ -5,14 +5,21 @@ using UnityEngine.UI;
 
 public class ShopUI : MonoBehaviour
 {
+    public enum ShopState
+    {
+        Main, Buy, Sell
+    }
+
     [SerializeField] private FarmUI farmUI;
     [SerializeField] private TextMeshProUGUI shopMessageText;
     [SerializeField] private List<string> shopMessageList;
+    [SerializeField] private GameObject inventoryItemPrefab;
+    [SerializeField] private GameObject mainContent;
 
     [Header("Buying")]
     [SerializeField] private GameObject buyContent;
-    [SerializeField] private TextMeshProUGUI goldOwnedBuy;
-    [SerializeField] private TextMeshProUGUI goldCost;
+    [SerializeField] private AnimatingTMP goldOwnedBuy;
+    [SerializeField] private AnimatingTMP goldCost;
     [SerializeField] private InventoryItemSO shopItem;
     [SerializeField] private Image shopItemImage;
     [SerializeField] private TextMeshProUGUI shopItemName;
@@ -26,10 +33,17 @@ public class ShopUI : MonoBehaviour
 
     [Header("Selling")]
     [SerializeField] private GameObject sellContent;
-    [SerializeField] private TextMeshProUGUI goldOwnedSell;
+    [SerializeField] private Transform sellItems;
+    [SerializeField] private AnimatingTMP goldOwnedSell;
+    [SerializeField] private GameObject confirmDenyPopup;
+    [SerializeField] private TextMeshProUGUI confirmDenyGold;
+    private int currentSellAllGold;
+    private List<InventoryItemUI> inventoryItemUIs;
 
     private Inventory inventory;
     private int goldAmount;
+
+    private ShopState shopState;
 
     //TESTING
     [Header("TESTING")]
@@ -39,14 +53,14 @@ public class ShopUI : MonoBehaviour
     {
         inventory = GameManager.Instance.GetInventory();
         cartItems = new List<InventoryItemSO>();
+        inventoryItemUIs = new List<InventoryItemUI>();
         goldAmount = inventory.GetGold();
-        goldOwnedBuy.text = goldAmount.ToString();
-        goldOwnedSell.text = goldAmount.ToString();
         purchaseColor = purchaseButton.color;
         shopItemImage.sprite = shopItem.sprite;
         shopItemName.text = shopItem.itemName;
         shopItemDescription.text = shopItem.description;
         shopItemPrice.text = shopItem.dataA.ToString();
+        shopState = ShopState.Main;
     }
 
     private void OnEnable()
@@ -55,8 +69,7 @@ public class ShopUI : MonoBehaviour
         if (inventory != null)
         {
             goldAmount = inventory.GetGold();
-            goldOwnedBuy.text = goldAmount.ToString();
-            goldOwnedSell.text = goldAmount.ToString();
+            SetGold();
         }
     }
 
@@ -70,9 +83,127 @@ public class ShopUI : MonoBehaviour
         shopMessageText.text = shopMessageList[Random.Range(0, shopMessageList.Count)];
     }
 
+    public void OpenBuy()
+    {
+        shopState = ShopState.Buy;
+        mainContent.SetActive(false);
+        buyContent.SetActive(true);
+        goldOwnedBuy.InitializeValue(goldAmount);
+        goldCost.InitializeValue(0);
+    }
+
+    public void CloseBuy()
+    {
+        shopState = ShopState.Main;
+        EmptyCart();
+        mainContent.SetActive(true);
+        buyContent.SetActive(false);
+    }
+
+    public void OpenSell()
+    {
+        if (inventoryItemUIs.Count == 0)
+        {
+            inventoryItemUIs = new List<InventoryItemUI>(sellItems.GetComponentsInChildren<InventoryItemUI>());
+        }
+        ItemsWrapper sellItemsWrapper = inventory.FilterByCategory(InventoryCategory.Harvest);
+        for (int i = 0; i < sellItemsWrapper.items.Count; i++) 
+        {
+            inventoryItemUIs[i].Populate(sellItemsWrapper.items[i], true);
+            inventoryItemUIs[i].OnSellItem += ShopUI_OnSellItem;
+        }
+        shopState = ShopState.Sell;
+        mainContent.SetActive(false);
+        sellContent.SetActive(true);
+        goldOwnedSell.InitializeValue(goldAmount);
+    }
+
+    private void ShopUI_OnSellItem(InventoryItem soldItem)
+    {
+        if (inventory.TryUseItem(soldItem.inventoryItemSO, 1, soldItem.quality))
+        {
+            ResetSell(true);
+            inventory.ChangeGold(soldItem.inventoryItemSO.GetCost(soldItem.quality));
+            SetGold();
+        }
+    }
+
+    public void CloseSell()
+    {
+        ResetSell();
+        shopState = ShopState.Main;
+        mainContent.SetActive(true);
+        sellContent.SetActive(false);
+    }
+
+    public void ResetSell(bool repopuplate = false)
+    {
+        foreach (InventoryItemUI itemSlot in inventoryItemUIs)
+        {
+            itemSlot.Empty();
+            itemSlot.OnSellItem -= ShopUI_OnSellItem;
+        }
+        if (repopuplate)
+        {
+            ItemsWrapper sellItemsWrapper = inventory.FilterByCategory(InventoryCategory.Harvest);
+            for (int i = 0; i < sellItemsWrapper.items.Count; i++)
+            {
+                inventoryItemUIs[i].Populate(sellItemsWrapper.items[i], true);
+                inventoryItemUIs[i].OnSellItem += ShopUI_OnSellItem;
+            }
+        }
+    }
+
+    public void SellAll()
+    {
+        currentSellAllGold = 0;
+        foreach (InventoryItemUI inventoryItemUI in inventoryItemUIs)
+        {
+            InventoryItem currentItem = inventoryItemUI.GetInventoryItem();
+            if (!currentItem.IsNull())
+            {
+                currentSellAllGold += currentItem.inventoryItemSO.GetCost(currentItem.quality) * currentItem.quantity;
+            }
+        }
+        confirmDenyPopup.SetActive(true);
+        confirmDenyGold.text = currentSellAllGold.ToString();
+    }
+
+    public void CancelPopup()
+    {
+        confirmDenyGold.text = "0";
+        confirmDenyPopup.SetActive(false);
+    }
+
+    public void ConfirmSellAll()
+    {
+        CancelPopup();
+        inventory.ChangeGold(currentSellAllGold);
+        SetGold();
+        foreach (InventoryItemUI inventoryItemUI in inventoryItemUIs)
+        {
+            InventoryItem currentItem = inventoryItemUI.GetInventoryItem();
+            if (!currentItem.IsNull())
+            {
+                inventory.TryUseItem(currentItem.inventoryItemSO, currentItem.quantity, currentItem.quality);
+            }
+        }
+        ResetSell(true);
+        currentSellAllGold = 0;
+    }
+
     public void ExitShop()
     {
-        EmptyCart();
+        switch (shopState) {
+            case ShopState.Buy:
+                CloseBuy();
+                break;
+            case ShopState.Sell:
+                CloseSell();
+                break;
+            default:
+                break;
+        }
         farmUI.SetUIObjectActive(false, FarmUI.UISegment.ShopUI);
         GameManager.Instance.ResetGameState();
     }
@@ -109,14 +240,14 @@ public class ShopUI : MonoBehaviour
     private void AddCartAmount(int amount)
     {
         cartAmount += amount;
-        goldCost.text = cartAmount.ToString();
+        goldCost.AnimateChange(cartAmount);
         if (cartAmount > goldAmount)
         {
-            goldCost.color = Color.red;
+            goldCost.SetColor(Color.red);
             purchaseButton.color = Color.gray;
         } else
         {
-            goldCost.color = Color.white;
+            goldCost.SetColor(Color.white);
             purchaseButton.color = purchaseColor;
         }
     }
@@ -135,13 +266,18 @@ public class ShopUI : MonoBehaviour
         {
             foreach (InventoryItemSO item in cartItems)
             {
-                inventory.AddItem(item, new InventoryItem(0, 1));
+                inventory.AddItem(new InventoryItem(item, 0, 1));
             }
             inventory.ChangeGold(-cartAmount);
-            goldAmount = inventory.GetGold();
-            goldOwnedBuy.text = goldAmount.ToString();
-            goldOwnedSell.text = goldAmount.ToString();
+            SetGold();
             EmptyCart();
         }
+    }
+
+    public void SetGold()
+    {
+        goldAmount = inventory.GetGold();
+        if (shopState == ShopState.Buy) goldOwnedBuy.AnimateChange(goldAmount);
+        else if (shopState == ShopState.Sell) goldOwnedSell.AnimateChange(goldAmount);
     }
 }
