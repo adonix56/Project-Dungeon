@@ -107,6 +107,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void EndDragging()
     {
+        tryDragging = false;
         isDragging = false;
         newDragOffset = true;
         if (currentGameState == GameState.Dragging || currentGameState == GameState.MovingObject) ResetGameState();
@@ -136,6 +137,7 @@ public class GameManager : MonoBehaviour
     public void StartMoving(ISelectable newMovingSelectable)
     {
         movingSelectable = newMovingSelectable;
+        ResetGameState();
     }
 
     /// <summary>
@@ -155,6 +157,11 @@ public class GameManager : MonoBehaviour
     {
         if (playerController.IsInteractingWithUI()) return;
         if (currentGameState == GameState.Select) return;
+        if (currentGameState == GameState.SelectHold)
+        {
+            EndSelectHold();
+            return;
+        }
 
         if (HitShop(out Shop shop))
         {

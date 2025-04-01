@@ -113,6 +113,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
     public virtual void SelectHold()
     {
         RadialFarm radialFarm = Instantiate(radialMenuPrefab, mainCanvas.transform).GetComponent<RadialFarm>();
+        radialFarm.transform.SetAsFirstSibling();
         currentRadialMenu = radialFarm.GetComponent<Animator>();
         radialFarm.SetFollowTransform(midpoint);
 
@@ -146,6 +147,7 @@ public class BasePlacement : MonoBehaviour, ISelectable
         }
 
         currentConfirmCancel = Instantiate(confirmCancelPrefab, mainCanvas.transform).GetComponent<ConfirmCancel>();
+        currentConfirmCancel.transform.SetAsFirstSibling();
 
         // Bug fix. Set the anchored position before the next frame renders.
         RectTransform rectTransform = currentConfirmCancel.GetComponent<RectTransform>();

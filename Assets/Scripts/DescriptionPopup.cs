@@ -51,9 +51,7 @@ public class DescriptionPopup : MonoBehaviour
         description.text = inventoryItemSO.description;
         qualityDisplay.SetQuality(inventoryItem.quality);
         sellPrice.text = inventoryItemSO.GetCost(inventoryItem.quality).ToString();
-        if (includeSellButton) { 
-            sellButton.SetActive(true);
-        }
+        sellButton.SetActive(includeSellButton);
     }
 
     public void Sell()
